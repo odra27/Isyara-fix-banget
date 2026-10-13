@@ -11,11 +11,13 @@ from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from dataclasses import dataclass
 
 from app.db.admin import AdminRepository, PostgresAdminRepository
+from app.db.chat import ChatRepository, PostgresChatRepository
 from app.db.devices import DeviceLookup, PostgresDeviceLookup
 from app.db.kiosk import KioskRepository, PostgresKioskRepository
 from app.db.logs import MatchingLogWriter, PostgresMatchingLogWriter
 from app.db.phrases import PhraseRepository, PostgresPhraseLookup, connect
 from app.db.staff import PostgresStaffRepository, StaffRepository
+from app.db.students import PostgresStudentRepository, StudentRepository
 
 
 @dataclass(frozen=True)
@@ -26,6 +28,8 @@ class RequestDb:
     admin: AdminRepository | None = None  # admin API only (ADR-040..043)
     staff: StaffRepository | None = None  # staff auth / login only (ADR-047)
     kiosk: KioskRepository | None = None  # kiosk operations (ADR-047 D7–D9)
+    students: StudentRepository | None = None  # student login / profile (ADR-051 D2)
+    chat: ChatRepository | None = None  # chatbot history (ADR-051 D4)
 
 
 OpenDb = Callable[[], AbstractAsyncContextManager[RequestDb]]
@@ -45,6 +49,8 @@ async def open_postgres() -> AsyncIterator[RequestDb]:
             admin=PostgresAdminRepository(conn),
             staff=PostgresStaffRepository(conn),
             kiosk=PostgresKioskRepository(conn),
+            students=PostgresStudentRepository(conn),
+            chat=PostgresChatRepository(conn),
         )
     finally:
         await conn.close()

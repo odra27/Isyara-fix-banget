@@ -4,7 +4,7 @@ import type { ConversationItem } from '@/types/kiosk';
  * Riwayat percakapan sesi ini.
  *
  * Disimpan di level modul (bukan di dalam KioskProvider) supaya riwayat tetap ada
- * saat petugas berpindah antara kiosk dan Dashboard Petugas. Tetap HANYA di memori:
+ * saat siswa berpindah antara Kiosk dan menu lain. Tetap HANYA di memori:
  * tidak ditulis ke storage dan hilang saat halaman dimuat ulang (PRD §17).
  */
 const MAX_ITEMS = 50;

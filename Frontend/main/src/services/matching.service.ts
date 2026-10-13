@@ -1,7 +1,7 @@
 import { APP } from '@/config/app.config';
 import { decideAction } from '@/config/confidence.config';
-import { patientPhrases, phraseById } from '@/data/phrases.mock';
-import { tokenizeUtterance } from './textMatch';
+import { phraseById, studentPhrases } from '@/data/phrases.mock';
+import { tokenizeWords } from './textMatch';
 import type { HandFrame, MatchResult } from '@/types/kiosk';
 import { logsService } from './logs.service';
 
@@ -141,20 +141,20 @@ async function simulateNetwork() {
 }
 
 /**
- * Kalimat petugas → urutan kata kosakata (ADR-050). Pencocokan kamus persis:
- * ada minimal 1 kata cocok → diputar (accepted); tidak ada sama sekali → NO_MATCH (teks + Panggil JBI).
+ * Kalimat guru → urutan kata (ADR-050, ADR-051 D5). Kata kosakata diperagakan dengan rekaman asli,
+ * kata lain dengan gerakan buatan, jadi setiap kalimat yang berisi kata selalu diputar (accepted).
  */
 export function matchTextLocal(utterance: string): MatchResult {
-  const segments = tokenizeUtterance(utterance);
+  const segments = tokenizeWords(utterance);
   const hits = segments.filter((s) => s.phraseId);
   for (const h of hits) {
     logsService.add({ direction: 'speech_to_sign', predictedPhraseId: h.phraseId, confidence: 1, resultedAction: 'accepted', source: 'match' });
   }
-  if (hits.length === 0) {
+  if (segments.length === 0) {
     return { phraseId: null, phraseText: null, confidence: 0, action: 'escalated_to_jbi', segments };
   }
   return {
-    phraseId: hits[0].phraseId,
+    phraseId: hits[0]?.phraseId ?? null,
     phraseText: segments.map((s) => s.text).join(' '),
     confidence: 1,
     action: 'accepted',
@@ -180,7 +180,9 @@ function buildResult(phraseId: string | null, confidence: number, direction: 'si
 export const mockMatchingService: MatchingService = {
   async matchSign() {
     await simulateNetwork();
-    const pick = patientPhrases[Math.floor(Math.random() * patientPhrases.length)];
+    // Mock: hanya kata kosakata model (label_XX), sama seperti yang bisa dikenali model asli.
+    const words = studentPhrases.filter((p) => p.id.startsWith('label_'));
+    const pick = words[Math.floor(Math.random() * words.length)];
     return buildResult(pick.id, mockControls.forcedConfidence ?? randomConfidence(), 'sign_to_text');
   },
   async matchText(utterance) {

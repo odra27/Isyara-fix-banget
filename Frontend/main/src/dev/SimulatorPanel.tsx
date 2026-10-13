@@ -47,7 +47,7 @@ export function SimulatorPanel() {
 
   const run = (id: ScenarioName) => {
     stopRef.current?.();
-    if (k.tab !== 'pasien') k.setTab('pasien');
+    if (k.tab !== 'siswa') k.setTab('siswa');
     setPlayingSample(null);
     setPlaying(id);
     stopRef.current = playScenario(id, () => setPlaying(null));
@@ -55,7 +55,7 @@ export function SimulatorPanel() {
 
   const runSample = async (s: DevSample) => {
     stopRef.current?.();
-    if (k.tab !== 'pasien') k.setTab('pasien');
+    if (k.tab !== 'siswa') k.setTab('siswa');
     setPlaying(null);
     setPlayingSample(s.clip);
     stopRef.current = await playDevSample(s, () => setPlayingSample(null));

@@ -4,12 +4,11 @@ import { Button } from '@/components/ui/button';
 import { isDevMode } from '@/lib/utils';
 
 /**
- * Error boundary kiosk (PRD-FE §9: aplikasi tidak boleh blank kalau satu modul crash).
+ * Error boundary (PRD-FE §9: aplikasi tidak boleh blank kalau satu modul crash).
  *
  * Tiga level pemakaian:
  *  - 'app'   : jaring terakhir di main.tsx. Layar penuh + tombol muat ulang.
- *  - 'panel' : membungkus satu panel alur. Panel lain & kerangka kiosk tetap hidup,
- *              petugas/pasien bisa pindah tab untuk melanjutkan percakapan.
+ *  - 'panel' : membungkus satu halaman / panel. Sidebar & menu lain tetap hidup.
  *  - 'quiet' : lapisan hiasan/notifikasi (overlay, simulator). Kalau crash cukup hilang
  *              tanpa menutupi alur utama.
  *
@@ -20,7 +19,7 @@ type Level = 'app' | 'panel' | 'quiet';
 
 type Props = {
   children: ReactNode;
-  /** Nama bagian, dipakai di pesan fallback dan log. Mis. "Pasien". */
+  /** Nama bagian, dipakai di pesan fallback dan log. Mis. "Chatbot". */
   label?: string;
   level?: Level;
   /** Bila nilainya berubah, boundary otomatis pulih (mis. saat pindah tab). */
@@ -37,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Tidak dikirim ke server: crash report bisa memuat data percakapan pasien.
+    // Tidak dikirim ke server: crash report bisa memuat isi percakapan siswa.
     console.error(`[ErrorBoundary${this.props.label ? ` · ${this.props.label}` : ''}]`, error, info.componentStack);
   }
 
@@ -48,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
   private reset = () => this.setState({ error: null });
 
   private detail() {
-    // Pesan teknis hanya untuk mode dev (?dev=1) — pasien & petugas tidak perlu lihat stack trace.
+    // Pesan teknis hanya untuk mode dev (?dev=1) — siswa tidak perlu lihat stack trace.
     if (!isDevMode() || !this.state.error) return null;
     return (
       <pre className="mt-1 max-w-full overflow-x-auto rounded-xl bg-brand-50 p-3 text-left text-[0.6875rem] leading-relaxed text-brand-800">
@@ -71,13 +70,13 @@ export class ErrorBoundary extends Component<Props, State> {
               <TriangleAlert className="size-7" aria-hidden="true" />
             </span>
             <div>
-              <h1 className="text-[1.75rem] font-extrabold leading-[1.1] tracking-[-0.035em]">Kiosk perlu dimuat ulang</h1>
+              <h1 className="text-[1.75rem] font-extrabold leading-[1.1] tracking-[-0.035em]">ISYARA perlu dimuat ulang</h1>
               <p className="mt-2 text-sm text-muted">
-                Terjadi gangguan teknis. Riwayat percakapan sesi ini tidak tersimpan. Bila perlu bantuan segera, minta petugas memanggil JBI.
+                Terjadi gangguan teknis. Riwayat chat yang sudah terkirim tetap aman di akunmu. Muat ulang halaman untuk melanjutkan.
               </p>
             </div>
             <Button size="lg" onClick={() => window.location.reload()}>
-              <RotateCcw aria-hidden="true" /> Muat ulang kiosk
+              <RotateCcw aria-hidden="true" /> Muat ulang
             </Button>
             {this.detail()}
           </div>
@@ -93,7 +92,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </span>
           <p className="text-lg font-extrabold">{label ? `Bagian ${label} bermasalah` : 'Bagian ini bermasalah'}</p>
           <p className="text-sm text-muted">
-            Bagian kiosk yang lain tetap bisa dipakai. Coba muat ulang bagian ini, atau pindah tab untuk melanjutkan percakapan.
+            Bagian lain tetap bisa dipakai. Coba muat ulang bagian ini, atau pindah ke menu lain dulu.
           </p>
           <Button variant="soft" onClick={this.reset}>
             <RotateCcw aria-hidden="true" /> Coba lagi

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check, CircleQuestionMark, RotateCcw, Users, Volume2 } from 'lucide-react';
+import { Check, CircleQuestionMark, Keyboard, RotateCcw, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MatchResult } from '@/types/kiosk';
 import { cn } from '@/lib/utils';
@@ -7,18 +7,23 @@ import { cn } from '@/lib/utils';
 /**
  * Tampilan hasil sesuai confidence (PRD-FE §6), dipakai kedua alur.
  * accepted  → teks hasil (+ indikator dibacakan)
- * confirmed → "Kemungkinan maksud" + bar confidence + Konfirmasi / Coba Lagi / Panggil JBI
- * escalated → "Tidak ada frasa yang cocok" + Panggil JBI (utama) + Coba Lagi
+ * confirmed → "Kemungkinan maksud" + bar confidence + Konfirmasi / Coba lagi
+ * <60%      → "Isyarat belum dikenali" + Coba lagi / Ketik saja (ADR-051: tanpa JBI)
  */
 type Props = {
   result: MatchResult;
   /** Label kecil di atas teks hasil saat accepted. */
   acceptedLabel: string;
   confirmLabel: string;
+  /** Teks status TTS saat accepted, mis. "Sedang dibacakan untuk guru". */
+  speakingLabel?: string;
   speaking?: boolean;
   onConfirm: () => void;
   onRetry: () => void;
-  onJbi: () => void;
+  /** Opsional: pindah ke input ketik. Tidak ditampilkan bila kosong. */
+  onType?: () => void;
+  unknownTitle?: string;
+  unknownBody?: string;
   className?: string;
 };
 
@@ -62,7 +67,19 @@ function SpeakingWave({ on }: { on: boolean }) {
 
 const enter = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const } };
 
-export function ResultCard({ result, acceptedLabel, confirmLabel, speaking, onConfirm, onRetry, onJbi, className }: Props) {
+export function ResultCard({
+  result,
+  acceptedLabel,
+  confirmLabel,
+  speakingLabel = 'Sedang dibacakan',
+  speaking,
+  onConfirm,
+  onRetry,
+  onType,
+  unknownTitle = 'Isyarat belum dikenali',
+  unknownBody = 'Kami tidak mau menebak. Coba isyaratkan sekali lagi dengan pelan, atau ketik saja.',
+  className,
+}: Props) {
   if (result.action === 'accepted') {
     const words = (result.phraseText ?? '').split(' ');
     return (
@@ -87,7 +104,7 @@ export function ResultCard({ result, acceptedLabel, confirmLabel, speaking, onCo
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2 text-sm font-semibold text-brand-800">
             <Volume2 className="size-4 text-brand-600" aria-hidden="true" />
-            {speaking ? 'Sedang dibacakan untuk petugas' : 'Sudah dibacakan'}
+            {speaking ? speakingLabel : 'Sudah dibacakan'}
             <SpeakingWave on={!!speaking} />
           </span>
           <Button variant="ghost" size="sm" onClick={onRetry}>
@@ -106,11 +123,10 @@ export function ResultCard({ result, acceptedLabel, confirmLabel, speaking, onCo
         <div className="mt-4">
           <ConfidenceBar value={result.confidence} tone="mid" />
         </div>
-        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {[
-            { key: 'c', node: <Button onClick={onConfirm} size="lg" className="w-full"><Check /> Konfirmasi</Button> },
+            { key: 'c', node: <Button onClick={onConfirm} size="lg" className="w-full"><Check /> Ya, benar</Button> },
             { key: 'r', node: <Button onClick={onRetry} variant="outline" size="lg" className="w-full"><RotateCcw /> Coba lagi</Button> },
-            { key: 'j', node: <Button onClick={onJbi} variant="outline" size="lg" className="w-full"><Users /> Panggil JBI</Button> },
           ].map((b, i) => (
             <motion.div key={b.key} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.07 }}>
               {b.node}
@@ -125,18 +141,20 @@ export function ResultCard({ result, acceptedLabel, confirmLabel, speaking, onCo
     <motion.div {...enter} className={cn('rounded-3xl bg-white p-5 md:p-6', className)} data-result="unknown">
       <p className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
         <CircleQuestionMark className="size-5 text-muted" aria-hidden="true" />
-        Tidak ada frasa yang cocok
+        {unknownTitle}
       </p>
-      <p className="mt-1.5 text-sm text-muted">Kami tidak mau menebak. Coba sekali lagi atau minta bantuan juru bahasa isyarat.</p>
-      <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-[1.4fr_1fr]">
+      <p className="mt-1.5 text-sm text-muted">{unknownBody}</p>
+      <div className={cn('mt-5 grid grid-cols-1 gap-2', onType && 'sm:grid-cols-2')}>
         <motion.div initial={{ scale: 1 }} animate={{ scale: [1, 1.04, 1] }} transition={{ delay: 0.35, duration: 0.5 }}>
-          <Button onClick={onJbi} variant="dark" size="lg" className="w-full">
-            <Users /> Panggil JBI
+          <Button onClick={onRetry} variant="dark" size="lg" className="w-full">
+            <RotateCcw /> Coba lagi
           </Button>
         </motion.div>
-        <Button onClick={onRetry} variant="outline" size="lg" className="w-full">
-          <RotateCcw /> Coba lagi
-        </Button>
+        {onType && (
+          <Button onClick={onType} variant="outline" size="lg" className="w-full">
+            <Keyboard /> Ketik saja
+          </Button>
+        )}
       </div>
     </motion.div>
   );

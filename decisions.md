@@ -2473,3 +2473,43 @@ This ADR authorizes, in a later implementation task: a `staff_profiles` table, a
 3. **Decision:** an exact dictionary match is `accepted` (confidence 1). If no word matches, the result is NO_MATCH (text + Panggil JBI). Sign → text thresholds (ADR-006/007) are unchanged.
 4. **Playback:** matched words are played as one continuous animation (start/end hold only once, ~150 ms transitions, resting/still frames trimmed at word joins).
 5. **Logging:** speech_to_sign results are logged locally only; `/api/logs` still rejects `speech_to_sign` (unchanged).
+
+# ADR-051 — Pivot to Education: Student Accounts, Chatbot, No JBI Escalation
+
+**Status:** Accepted (requested by the project owner, 2026-10-13)
+**Supersedes:** the Puskesmas domain framing of PRD.md / AGENTS.md §1, §21 and §29; ADR-001 "no daily login" for the student app; the JBI escalation UI of ADR-047 D9 and ADR-050 D3 (Frontend only).
+**Relates to:** ADR-006/007 (thresholds, unchanged), ADR-012 (privacy), ADR-032 (this ADR is the recorded scope decision), ADR-039 (JWT verification), ADR-047 D5 (login pattern), ADR-049, ADR-050.
+
+## Context
+The product moves from a Puskesmas counter kiosk (Deaf patient ↔ staff) to an inclusive **education** platform for Deaf students (siswa Tuli). Brand stays **ISYARA**, logo unchanged.
+
+## Decisions
+1. **Domain & framing.** Required framing text becomes: *"AI membantu mengenali sejumlah kosakata BISINDO yang telah divalidasi untuk kegiatan belajar."* The system is still not a general-purpose BISINDO translator. The two-way kiosk stays as **Mode Kiosk kelas** (siswa ↔ guru).
+2. **Student accounts (NIS).** Schools register students; there is no self sign-up and no teacher role yet. Supabase Auth user with `app_metadata.role = "siswa"` + one `student_profiles` row (`id` = auth user, `institution_id`, `nis` **globally unique**, `full_name`, `class_name`, `grade` 1–12, `avatar_url`, `active`). Endpoints: `POST /api/student/auth/login {nis, password}` (same generic `INVALID_CREDENTIALS` / `AUTH_UNAVAILABLE` behavior as ADR-047 D5) and `GET /api/student/me`. `require_student` accepts only role `siswa`; student tokens are rejected by staff/admin dependencies and vice versa. Provisioning until an admin endpoint exists: Supabase dashboard + SQL insert (documented in the migration).
+3. **Chatbot model.** `POST /api/chat/sessions/{id}/messages` sends the conversation **text** (last 20 messages + a fixed system prompt asking for short, plain Indonesian answers) to **OpenRouter** (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL` default `openrouter/auto`, `OPENROUTER_TIMEOUT_S` default 25). The key lives only in the Backend. Without a key the Backend uses an offline stand-in that honestly answers that no model is connected. Model failure → `503 CHAT_MODEL_UNAVAILABLE`, timeout → `504 CHAT_MODEL_TIMEOUT`; nothing is stored in that case. The concrete model is chosen later.
+4. **Chat history.** Tables `chat_sessions` (per student) and `chat_messages` (`role` user|assistant, `content` text, `input_mode` text|sign|null). The user message, the answer and the session `updated_at`/title are written in one transaction. All queries are scoped by the caller's `student_id`; another student's session answers `404 CHAT_SESSION_NOT_FOUND`. RLS enabled without policies (as ADR-048). **Privacy:** only text is stored. Sign input is recognized through the existing `POST /api/match/sign` in memory (ADR-012); landmarks, audio and video are never stored. Sending student chat text to OpenRouter is an approved third-party transfer under this ADR.
+5. **Answer as sign animation.** Answers are shown as text + TTS + skeleton animation. Vocabulary words (all 43 labels, synced by `scripts/sync-skeletons.mjs`) use the real recordings. Every other word gets a **procedurally generated motion** (`features/skeleton-animation/generated.ts`): deterministic per word, and rejected/regenerated until its wrist trajectory is at least 0.32 shoulder-widths from every trained clip (trained clips differ from each other by a median of ~0.23). Generated motions are not BISINDO and are not labelled as such in the UI by owner request. The same applies to the kiosk guru → siswa direction (supersedes ADR-050 D2/D3 "text only / NO_MATCH").
+6. **Learning materials.** Dummy data in the Frontend (`src/data/materi.ts`), avatar placeholder instead of video, "Materi Saya" (saved / recent) in localStorage per student. No materials API or CMS yet.
+7. **No JBI.** The Frontend no longer offers or logs JBI escalation. Below 0.60 the UI shows "Isyarat belum dikenali" with retry / type. The Backend contract is **unchanged**: `/api/match/sign` still returns `escalated_to_jbi` for < 0.60 and the staff endpoints (`/api/kiosk/call-jbi`, staff login/dashboard) remain in the Backend but have no Frontend consumer.
+8. **Unchanged:** confidence thresholds, `/api/match/sign` contract, Modeling boundary, staff/admin APIs, existing schema.
+
+## Migration
+`Database/migrations/20261013000000_adr051_student_chat_schema.sql` (non-destructive, `create table if not exists`).
+
+## Open items
+1. Concrete OpenRouter model and content moderation policy for student chats.
+2. Admin/school endpoint for registering students (and password reset).
+3. Retention period / deletion policy for chat history.
+4. Teacher (guru) role and accounts.
+5. Token refresh (the FE currently ends the session on 401 after the ~1 h Supabase token expires).
+
+# ADR-052 — Persistent Student Session (Refresh Token)
+
+**Status:** Accepted (requested by the project owner, 2026-10-13)
+**Relates to:** ADR-051 D2, ADR-047 D5.
+
+## Decisions
+1. Accounts stay school-registered (no self sign-up). The login form is shown only when the device has no valid session; a student who already logged in goes straight in.
+2. `POST /api/student/auth/refresh {refresh_token}` exchanges a Supabase refresh token (`grant_type=refresh_token`) for a new pair and re-checks role `siswa` + active profile. Failure → `401 INVALID_CREDENTIALS`, Supabase down → `503 AUTH_UNAVAILABLE`.
+3. The FE stores access + refresh token and expiry in localStorage, refreshes on app start and ~2 min before expiry, and retries a request once after a 401. Idle limit 14 days. Refresh rejected → session cleared → login form. Server unreachable → session kept.
+4. Operator scripts: `backend/scripts/apply_migrations.py` (idempotent migrations only) and `backend/scripts/create_student.py` (Supabase Admin API + `student_profiles`, rollback on failure).

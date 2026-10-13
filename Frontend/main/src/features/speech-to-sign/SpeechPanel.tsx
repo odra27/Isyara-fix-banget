@@ -4,7 +4,7 @@ import { Info, Mic, Send, Square, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PhrasePicker } from '@/components/kiosk/PhrasePicker';
 import { ResultCard } from '@/components/kiosk/ResultCard';
-import { officerPhrases } from '@/data/phrases.mock';
+import { teacherPhrases } from '@/data/phrases.mock';
 import { useKiosk } from '@/state/KioskContext';
 import { cn } from '@/lib/utils';
 import { SignVideo } from './SignVideo';
@@ -12,8 +12,8 @@ import { FlowSteps, MatchingViz, MicLevel } from './SpeechAnimations';
 import { useSpeechFlow } from './useSpeechFlow';
 
 /**
- * Panel Petugas (Alur B). Kiri: input petugas (Bicara / ketik / frasa cepat).
- * Kanan: output yang menghadap pasien (video isyarat + teks).
+ * Panel Guru (Alur B, mode Kiosk kelas). Kiri: input guru (Bicara / ketik / frasa cepat).
+ * Kanan: output yang menghadap siswa (animasi isyarat + teks).
  */
 export function SpeechPanel() {
   const k = useKiosk();
@@ -33,10 +33,10 @@ export function SpeechPanel() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
-      {/* ---------- Input petugas ---------- */}
-      <section aria-label="Input petugas" className="flex flex-col gap-3">
+      {/* ---------- Input guru ---------- */}
+      <section aria-label="Input guru" className="flex flex-col gap-3">
         <div className="rounded-[1.75rem] bg-white p-5 md:p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Untuk petugas</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Untuk guru</p>
 
           {!micOff ? (
             <div className="mt-4 flex flex-col items-center gap-4 text-center">
@@ -67,10 +67,10 @@ export function SpeechPanel() {
                     <p className="text-lg font-bold text-brand-900">
                       {f.interim
                         ? f.interim.split(' ').map((w, i) => (
-                          <motion.span key={`${i}-${w}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mr-[0.25em] inline-block">
-                            {w}
-                          </motion.span>
-                        ))
+                            <motion.span key={`${i}-${w}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mr-[0.25em] inline-block">
+                              {w}
+                            </motion.span>
+                          ))
                         : 'Mendengarkan…'}
                     </p>
                   </div>
@@ -93,14 +93,14 @@ export function SpeechPanel() {
           )}
 
           <form onSubmit={onSubmit} className="mt-4 flex gap-2">
-            <label htmlFor="officer-text" className="sr-only">
-              Ketik kalimat petugas
+            <label htmlFor="teacher-text" className="sr-only">
+              Ketik kalimat guru
             </label>
             <input
-              id="officer-text"
+              id="teacher-text"
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
-              placeholder="Ketik kalimat, mis. “halo, selamat pagi, apa kabar?”"
+              placeholder="Ketik kalimat, mis. “selamat pagi, hari ini kita belajar”"
               autoComplete="off"
               className="h-12 min-w-0 flex-1 rounded-2xl border border-line bg-tint px-4 text-base text-brand-900 placeholder:text-muted focus:border-brand-400 focus:bg-white focus:outline-none"
             />
@@ -117,13 +117,13 @@ export function SpeechPanel() {
             <span className="hidden text-xs font-semibold text-muted group-open:inline">Sembunyikan</span>
           </summary>
           <div className="mt-4">
-            <PhrasePicker compact label="Frasa cepat petugas" phrases={officerPhrases} onPick={(p) => f.playPhrase(p.id)} />
+            <PhrasePicker compact label="Frasa cepat guru" phrases={teacherPhrases} onPick={(p) => f.playPhrase(p.id)} />
           </div>
         </details>
       </section>
 
-      {/* ---------- Output ke pasien ---------- */}
-      <section aria-label="Tampilan untuk pasien" className="flex flex-col">
+      {/* ---------- Output ke siswa ---------- */}
+      <section aria-label="Tampilan untuk siswa" className="flex flex-col">
         <FlowSteps phase={f.phase} />
         <AnimatePresence mode="wait">
           {f.phase === 'PLAYING' && f.result?.phraseText ? (
@@ -134,7 +134,7 @@ export function SpeechPanel() {
                 videoUrl={f.result.videoUrl}
                 onDone={f.onVideoDone}
               />
-              {f.lastUtterance && f.lastUtterance !== f.result.phraseText && (
+              {f.lastUtterance && f.lastUtterance.toLowerCase() !== f.result.phraseText.toLowerCase() && (
                 <p className="mt-3 px-2 text-sm text-muted">
                   Ucapan asli: <span className="font-semibold text-brand-800">“{f.lastUtterance}”</span>
                 </p>
@@ -144,11 +144,12 @@ export function SpeechPanel() {
             <div key="result">
               <ResultCard
                 result={f.result}
-                acceptedLabel="Petugas menyampaikan"
-                confirmLabel="Maksud Anda (untuk petugas)"
+                acceptedLabel="Guru menyampaikan"
+                confirmLabel="Maksud Anda (untuk guru)"
                 onConfirm={f.confirm}
                 onRetry={f.reset}
-                onJbi={f.callJbi}
+                unknownTitle="Tidak ada kata yang terbaca"
+                unknownBody="Coba ucapkan atau ketik kalimatnya sekali lagi."
               />
               <p className="mt-3 px-2 text-sm text-muted">
                 Ucapan: <span className="font-semibold text-brand-800">“{f.lastUtterance}”</span>
@@ -156,9 +157,9 @@ export function SpeechPanel() {
             </div>
           ) : f.phase === 'TEXT_ONLY' ? (
             <motion.div key="text" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl bg-brand-900 p-6 text-white">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-200">Pesan dari petugas</p>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-200">Pesan dari guru</p>
               <p className="mt-2 text-[2rem] font-extrabold leading-[1.1] tracking-[-0.035em]">{f.lastUtterance}</p>
-              <p className="mt-4 text-sm text-brand-100">Video isyarat tidak tersedia saat koneksi terputus.</p>
+              <p className="mt-4 text-sm text-brand-100">Animasi isyarat tidak tersedia saat koneksi terputus.</p>
             </motion.div>
           ) : (
             <motion.div
@@ -175,8 +176,8 @@ export function SpeechPanel() {
                   <span className="grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-400">
                     <Video className="size-6" aria-hidden="true" />
                   </span>
-                  <p className="text-lg font-extrabold">Video isyarat tampil di sini</p>
-                  <p className="max-w-xs text-sm text-muted">Ucapan petugas dicocokkan ke frasa terdekat, lalu video BISINDO diputar untuk pasien.</p>
+                  <p className="text-lg font-extrabold">Animasi isyarat tampil di sini</p>
+                  <p className="max-w-xs text-sm text-muted">Kalimat guru diperagakan kata demi kata dalam BISINDO, lengkap dengan teksnya.</p>
                 </div>
               )}
             </motion.div>

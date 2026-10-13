@@ -6,7 +6,7 @@ import { Icon } from '../ui/Icon';
 import { LogoMark } from '../ui/Logo';
 
 /**
- * Mockup kiosk yang memutar alur auto-capture PRD §9 secara berulang:
+ * Mockup mode kiosk (siswa ↔ guru di kelas) yang memutar alur auto-capture PRD §9 secara berulang:
  * IDLE → HAND_DETECTED → RECORDING → (diam) → PROCESSING → RESULT_ACCEPT.
  * Satu timeline GSAP master, di-pause saat keluar viewport.
  */
@@ -18,13 +18,13 @@ const PHASE_UI: Record<Phase, { pill: string; caption: string; dot: string }> = 
   recording: { pill: 'Merekam', caption: 'Merekam…', dot: 'bg-rec' },
   still: { pill: 'Merekam', caption: 'Diam sebentar untuk selesai', dot: 'bg-rec' },
   processing: { pill: 'Memproses', caption: 'Memproses…', dot: 'bg-brand-400' },
-  result: { pill: 'Tersampaikan', caption: 'Dibacakan untuk petugas', dot: 'bg-ok' },
+  result: { pill: 'Tersampaikan', caption: 'Dibacakan untuk guru', dot: 'bg-ok' },
 };
 
 const PHRASES = [
-  { text: 'Saya ingin berobat', conf: 94 },
-  { text: 'Saya demam', conf: 92 },
-  { text: 'Saya butuh resep', conf: 89 },
+  { text: 'Selamat pagi', conf: 94 },
+  { text: 'Terima kasih', conf: 92 },
+  { text: 'Apa kabar', conf: 89 },
 ] as const;
 
 const RING_R = 11;
@@ -178,7 +178,7 @@ export function KioskDemo() {
     <div
       ref={root}
       role="img"
-      aria-label="Ilustrasi kiosk ISYARA: kamera membaca isyarat pasien, merekam, memproses, lalu menampilkan dan membacakan frasa untuk petugas."
+      aria-label="Ilustrasi mode kiosk ISYARA: kamera membaca isyarat siswa, merekam, memproses, lalu menampilkan dan membacakan kata untuk guru."
       className="relative mx-auto w-[min(74vw,292px)] md:w-[300px] lg:w-[318px]"
     >
       <div aria-hidden="true" className="relative rounded-[42px] border-[7px] border-brand-900 bg-white p-2.5 shadow-phone">
@@ -269,12 +269,12 @@ export function KioskDemo() {
             <span className="js-spinner block size-8 rounded-full border-[3px] border-brand-100 border-t-brand-600" />
             <span>
               <span className="block text-[14px] font-extrabold tracking-tight">Memproses…</span>
-              <span className="block text-[10px] text-muted">Mencocokkan dengan frasa tervalidasi</span>
+              <span className="block text-[10px] text-muted">Mencocokkan dengan kosakata terlatih</span>
             </span>
           </div>
 
           <div className="js-panel-result invisible absolute inset-x-1.5 top-0">
-            <span className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-muted">Pasien menyampaikan</span>
+            <span className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-muted">Siswa menyampaikan</span>
             <p key={phrase.text} className="mt-1 text-[21px] font-extrabold leading-[1.05] tracking-[-0.045em]">
               {phrase.text.split(' ').map((w, i) => (
                 <span key={i} className="mr-[0.22em] inline-block overflow-hidden pb-0.5 align-bottom">
@@ -296,7 +296,7 @@ export function KioskDemo() {
                   <i key={i} className="block w-[2px] origin-center rounded-full bg-brand-400" style={{ height: h }} />
                 ))}
               </span>
-              Dibacakan untuk petugas
+              Dibacakan untuk guru
             </div>
           </div>
         </div>
@@ -308,8 +308,8 @@ export function KioskDemo() {
             Ulangi isyarat
           </span>
           <span className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-brand-900 text-[10px] font-bold text-white">
-            <Icon name="users" className="size-3" />
-            Panggil JBI
+            <Icon name="keyboard" className="size-3" />
+            Ketik saja
           </span>
         </div>
       </div>

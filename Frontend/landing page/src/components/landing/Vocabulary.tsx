@@ -2,13 +2,12 @@ import { useRef } from 'react';
 import { gsap, useGSAP, MOTION_OK } from '../../lib/gsap';
 import { EASE } from '../../animations/tokens';
 
-// Kosakata dari PRD §7, disusun mengikuti alur percakapan di Puskesmas.
+// Contoh dari 43 kosakata BISINDO yang dilatih pada model, dikelompokkan untuk konteks belajar.
 const GROUPS = [
-  { code: 'A', name: 'Pendaftaran', phrases: ['Saya ingin berobat', 'Saya punya janji', 'Saya ingin bertemu dokter'] },
-  { code: 'B', name: 'Keluhan', phrases: ['Saya sakit di sini', 'Sudah berapa hari?', 'Saya demam', 'Saya batuk', 'Saya pusing'] },
-  { code: 'C', name: 'Obat', phrases: ['Saya alergi obat ini', 'Saya butuh resep', 'Cara minumnya bagaimana?'] },
-  { code: 'D', name: 'Administrasi', phrases: ['Kapan kontrol berikutnya?', 'Di mana ruang obat?'] },
-  { code: 'E', name: 'Selalu tersedia', phrases: ['Saya tidak mengerti', 'Tolong ulangi', 'Panggil JBI'] },
+  { code: 'A', name: 'Sapaan', words: ['Halo', 'Apa kabar', 'Selamat pagi', 'Selamat siang', 'Terima kasih'] },
+  { code: 'B', name: 'Pertanyaan', words: ['Apa', 'Bagaimana', 'Berapa', 'Kapan', 'Cari'] },
+  { code: 'C', name: 'Di kelas', words: ['Belajar', 'Teman', 'Ingat', 'Hari', 'Saya', 'Kamu'] },
+  { code: 'D', name: 'Perasaan & sehari-hari', words: ['Bingung', 'Baik', 'Rumah', 'Air', 'Tidur'] },
 ];
 
 export function Vocabulary() {
@@ -36,42 +35,44 @@ export function Vocabulary() {
       <div className="wrap">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <h2 className="text-[clamp(36px,7vw,64px)] font-extrabold leading-[0.96] tracking-[-0.06em]">
-            Frasa yang
+            Kosakata untuk
             <br />
-            <span className="text-brand-200">benar-benar dipakai.</span>
+            <span className="text-brand-200">kegiatan belajar.</span>
           </h2>
           <p className="max-w-[360px] text-[14px] leading-relaxed text-brand-100">
-            ISYARA mengenali sejumlah frasa BISINDO yang telah divalidasi untuk layanan Puskesmas. Lebih sedikit, tapi
-            bisa diandalkan.
+            Model kami mengenali 43 kata BISINDO yang telah dilatih dan divalidasi. Lebih sedikit, tapi bisa
+            diandalkan.
           </p>
         </div>
 
         <div className="mt-10 grid gap-3 sm:grid-cols-2 md:mt-14 lg:grid-cols-5">
           {GROUPS.map((g) => (
-            <div
-              key={g.code}
-              className={`js-group rounded-3xl p-5 ${g.code === 'E' ? 'bg-brand-600' : 'border border-white/10 bg-white/[0.04]'}`}
-            >
+            <div key={g.code} className="js-group rounded-3xl border border-white/10 bg-white/[0.04] p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-[15px] font-extrabold">{g.name}</h3>
                 <span className="text-[11px] font-extrabold text-brand-200">{g.code}</span>
               </div>
               <ul className="mt-4 flex flex-wrap gap-1.5">
-                {g.phrases.map((p) => (
-                  <li
-                    key={p}
-                    className={`rounded-full px-2.5 py-1.5 text-[12px] font-semibold ${g.code === 'E' ? 'bg-white/15 text-white' : 'bg-white/[0.07] text-brand-100'}`}
-                  >
-                    {p}
+                {g.words.map((w) => (
+                  <li key={w} className="rounded-full bg-white/[0.07] px-2.5 py-1.5 text-[12px] font-semibold text-brand-100">
+                    {w}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
+          <div className="js-group rounded-3xl bg-brand-600 p-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[15px] font-extrabold">Di luar daftar?</h3>
+              <span className="text-[11px] font-extrabold text-brand-100">E</span>
+            </div>
+            <p className="mt-4 text-[13px] leading-relaxed text-white">
+              Ketik saja. Jawaban chatbot tetap ditampilkan sebagai animasi isyarat, termasuk kata yang belum dilatih.
+            </p>
+          </div>
         </div>
-
         <p className="mt-6 text-[12px] text-brand-200">
-          Demo memakai 5–10 frasa. Versi produk menargetkan 30–50 frasa, satu dialek BISINDO.
+          Contoh di atas sebagian dari 43 kata terlatih, satu dialek BISINDO.
         </p>
       </div>
     </section>

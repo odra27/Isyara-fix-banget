@@ -14,7 +14,7 @@ export const DUR = {
 } as const;
 
 /**
- * Timing loop demo kiosk di hero (detik). Nilai mencerminkan guard rail PRD §9:
+ * Timing loop demo mode kiosk (detik). Nilai mencerminkan guard rail PRD §9:
  * debounce 250 ms, ambang diam 1.5 dtk, batas rekam 8 dtk.
  * Pulse "Merekam" dijaga >= 1.2 dtk per siklus (keamanan fotosensitif).
  */
@@ -27,4 +27,15 @@ export const DEMO = {
   result: 3.2,
   maxRecord: 8,
   pulseHalf: 0.65,
+} as const;
+/** Timing mockup tablet di hero (detik): lama satu langkah siklus air disorot & ayunan float. */
+export const TABLET = {
+  stepHold: 2.6,
+  floatHalf: 3.2,
+  signHalf: 0.7,
+} as const;
+/** Timing mock chat Tanya ISYARA (detik). */
+export const CHAT = {
+  typing: 1.1,
+  gap: 0.35,
 } as const;

@@ -2,12 +2,16 @@ import { useEffect } from 'react';
 import { ScrollTrigger } from './lib/gsap';
 import { Nav } from './components/landing/Nav';
 import { Hero } from './components/landing/Hero';
+import { FeatureStrip } from './components/landing/FeatureStrip';
+import { Why } from './components/landing/Why';
+import { Materi } from './components/landing/Materi';
+import { Chatbot } from './components/landing/Chatbot';
 import { RevealScene } from './components/landing/RevealScene';
-import { Stat } from './components/landing/Stat';
 import { TwoWay } from './components/landing/TwoWay';
 import { HowItWorks } from './components/landing/HowItWorks';
 import { Confidence } from './components/landing/Confidence';
 import { Vocabulary } from './components/landing/Vocabulary';
+import { ForSchools } from './components/landing/ForSchools';
 import { Principles } from './components/landing/Principles';
 import { Closing } from './components/landing/Closing';
 
@@ -28,12 +32,16 @@ export default function App() {
       <Nav />
       <main id="konten">
         <Hero />
+        <FeatureStrip />
+        <Why />
+        <Materi />
+        <Chatbot />
         <RevealScene />
-        <Stat />
         <TwoWay />
         <HowItWorks />
         <Confidence />
         <Vocabulary />
+        <ForSchools />
         <Principles />
         <Closing />
       </main>

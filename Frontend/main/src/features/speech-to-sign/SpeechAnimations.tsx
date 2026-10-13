@@ -145,8 +145,8 @@ export function MatchingViz({ utterance }: { utterance: string }) {
       </div>
 
       <div>
-        <p className="text-lg font-extrabold">Mencocokkan makna…</p>
-        <p className="text-sm text-muted">Mencari frasa BISINDO terdekat</p>
+        <p className="text-lg font-extrabold">Menyiapkan isyarat…</p>
+        <p className="text-sm text-muted">Mencocokkan kata dengan kosakata BISINDO</p>
       </div>
     </div>
   );
@@ -228,7 +228,7 @@ export function SignAvatar({ text, durationMs, run }: { text: string; durationMs
   );
 }
 
-/** Teks frasa yang menyala per kata mengikuti progres video, memudahkan pasien mengikuti. */
+/** Teks frasa yang menyala per kata mengikuti progres video, memudahkan siswa mengikuti. */
 export function KaraokeText({ text, progress }: { text: string; progress: number }) {
   const words = text.split(' ');
   const lit = Math.min(words.length, Math.floor(progress * words.length + 0.35));

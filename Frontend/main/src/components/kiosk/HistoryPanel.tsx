@@ -5,7 +5,7 @@ import { useKiosk } from '@/state/KioskContext';
 import type { ConversationItem } from '@/types/kiosk';
 import { cn } from '@/lib/utils';
 
-/** Riwayat percakapan sesi ini. Hanya di memori, tidak dikirim / disimpan (PRD §17). */
+/** Riwayat percakapan kiosk sesi ini. Hanya di memori, tidak dikirim / disimpan (PRD §17). */
 const CHANNEL_ICON = { isyarat: Hand, suara: Mic, ketik: Keyboard, 'pilih-manual': Hand } as const;
 const CHANNEL_LABEL = { isyarat: 'isyarat', suara: 'suara', ketik: 'ketik', 'pilih-manual': 'pilih manual' } as const;
 
@@ -20,7 +20,7 @@ export function HistoryPanel() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-xs text-muted">
           <Info className="size-3.5" aria-hidden="true" />
-          Hanya tersimpan sementara di perangkat ini. Hapus sebelum pasien berikutnya.
+          Hanya tersimpan sementara di perangkat ini dan hilang saat halaman dimuat ulang.
         </p>
         <Button variant="outline" size="sm" onClick={k.clearConversation} disabled={!items.length}>
           <Trash /> Hapus percakapan
@@ -34,7 +34,7 @@ export function HistoryPanel() {
               <MessagesSquare className="size-6" aria-hidden="true" />
             </span>
             <p className="text-lg font-extrabold">Belum ada percakapan</p>
-            <p className="max-w-xs text-sm text-muted">Frasa dari pasien dan petugas akan muncul berurutan di sini.</p>
+            <p className="max-w-xs text-sm text-muted">Pesan dari siswa dan guru akan muncul berurutan di sini.</p>
           </div>
         </div>
       ) : (
@@ -58,7 +58,7 @@ function Bubble({ it }: { it: ConversationItem }) {
       </motion.li>
     );
   }
-  const officer = it.from === 'petugas';
+  const officer = it.from === 'guru';
   const Icon = it.channel ? CHANNEL_ICON[it.channel] : Hand;
   return (
     <motion.li
@@ -69,7 +69,7 @@ function Bubble({ it }: { it: ConversationItem }) {
     >
       <span className="mb-1 flex items-center gap-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.1em] text-muted">
         <Icon className="size-3" aria-hidden="true" />
-        {officer ? 'Petugas' : 'Pasien'} · {it.channel ? CHANNEL_LABEL[it.channel] : ''} · {time(it.at)}
+        {officer ? 'Guru' : 'Siswa'} · {it.channel ? CHANNEL_LABEL[it.channel] : ''} · {time(it.at)}
       </span>
       <span
         className={cn(

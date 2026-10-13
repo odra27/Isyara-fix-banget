@@ -142,6 +142,11 @@ class FakeGoTrue:
         if self.body is not None:
             return httpx.Response(200, content=self.body)
         data = json.loads(request.content)
+        if request.url.params.get("grant_type") == "refresh_token":
+            # refresh-<email> → that account (test-only token format); anything else is revoked.
+            token = data.get("refresh_token", "")
+            email = token.removeprefix("refresh-") if token.startswith("refresh-") else None
+            data = {"email": email, "password": self.accounts.get(email, (None,))[0]}
         account = self.accounts.get(data.get("email"))
         if account is None or account[0] != data.get("password"):
             return httpx.Response(400, json={"error": "invalid_grant", "error_description": "Invalid login credentials"})

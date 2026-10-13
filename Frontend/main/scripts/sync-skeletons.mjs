@@ -14,12 +14,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const src = resolve(root, '..', '..', 'ml', 'exports', 'skeleton');
 const out = join(root, 'src', 'features', 'skeleton-animation', 'data');
 
-// Kata di "Frasa cepat" petugas (src/data/phrases.mock.ts) yang ada di kosakata model.
-const IDS = [
-  'label_09', 'label_10', 'label_12', 'label_14', 'label_17',
-  'label_32', 'label_33', 'label_34', 'label_35', 'label_36', 'label_37', 'label_38',
-  'label_39', 'label_40', 'label_41', 'label_42',
-];
+// Semua 43 kata model (ADR-051): jawaban chatbot & kalimat guru bisa memakai kata mana pun.
+const IDS = Array.from({ length: 43 }, (_, i) => `label_${String(i).padStart(2, '0')}`);
+
+// File yang sudah ada TIDAK ditimpa (kecuali --force), karena sebagian sudah diberi titik muka asli
+// oleh scripts/add-skeleton-face.py dan ekspor ML tidak membawa muka.
+const force = process.argv.includes('--force');
 
 const unmirror = (p) => [Math.round((1 - p[0]) * 1e4) / 1e4, p[1]];
 
@@ -29,6 +29,10 @@ for (const id of IDS) {
   const f = join(src, `${id}.json`);
   if (!existsSync(f)) {
     missing.push(id);
+    continue;
+  }
+  if (!force && existsSync(join(out, `${id}.json`))) {
+    console.log(`skip ${id} (sudah ada, pakai --force untuk menimpa)`);
     continue;
   }
   const d = JSON.parse(readFileSync(f, 'utf8'));

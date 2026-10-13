@@ -8,9 +8,9 @@ import { useKiosk } from '@/state/KioskContext';
 import type { MatchResult } from '@/types/kiosk';
 
 /**
- * Alur B: suara/teks petugas → video isyarat (PRD-FE §5 & §6).
+ * Alur B: suara/teks guru → animasi isyarat (PRD-FE §5 & §6).
  * B_IDLE → B_LISTENING → B_MATCHING → B_PLAYING_SIGN → B_IDLE
- *                                   ↘ B_CONFIRM (ke petugas)   ↘ B_NO_MATCH
+ *                                   ↘ B_CONFIRM (ke guru)   ↘ B_NO_MATCH
  */
 export type SpeechPhase = 'IDLE' | 'LISTENING' | 'MATCHING' | 'CONFIRM' | 'PLAYING' | 'NO_MATCH' | 'TEXT_ONLY';
 
@@ -29,9 +29,9 @@ export function useSpeechFlow() {
       const text = utterance.trim();
       if (!text) return;
       setLastUtterance(text);
-      k.say({ from: 'petugas', text, channel });
+      k.say({ from: 'guru', text, channel });
 
-      // Backend mati: tampilkan teks petugas apa adanya ke pasien (tetap bisa dibaca).
+      // Backend mati: tampilkan teks guru apa adanya ke siswa (tetap bisa dibaca).
       if (k.speechFallback === 'backend') {
         setResult(null);
         setPhase('TEXT_ONLY');
@@ -62,14 +62,12 @@ export function useSpeechFlow() {
 
   // Alasan tombol Bicara nonaktif harus tertulis (PRD-FE §7.2).
   const talkBlockedReason = k.signRecording
-    ? 'Pasien sedang mengisyaratkan. Tunggu sampai selesai.'
+    ? 'Siswa sedang mengisyaratkan. Tunggu sampai selesai.'
     : k.ttsSpeaking
       ? 'Suara sedang dibacakan. Mic aktif lagi setelah selesai.'
-      : k.escalated
-        ? 'Sedang menunggu JBI.'
-        : phase === 'MATCHING'
-          ? 'Sedang mencocokkan ucapan.'
-          : null;
+      : phase === 'MATCHING'
+        ? 'Sedang mencocokkan ucapan.'
+        : null;
 
   const startTalking = useCallback(() => {
     if (talkBlockedReason) return;
@@ -111,13 +109,13 @@ export function useSpeechFlow() {
     setPhase('PLAYING');
   }, [result]);
 
-  /** Mode fallback / pintasan: petugas memilih frasa langsung → putar video. */
+  /** Mode fallback / pintasan: guru memilih frasa langsung → putar animasi. */
   const playPhrase = useCallback(
     (phraseId: string) => {
       const p = phraseById(phraseId);
       if (!p) return;
       reqId.current++;
-      k.say({ from: 'petugas', text: p.text, channel: 'pilih-manual' });
+      k.say({ from: 'guru', text: p.text, channel: 'pilih-manual' });
       setLastUtterance(p.text);
       setResult({ phraseId: p.id, phraseText: p.text, confidence: 1, action: 'accepted', videoUrl: p.videoUrl, segments: [{ phraseId: p.id, text: p.text }] });
       setPlayId((n) => n + 1);
@@ -132,11 +130,6 @@ export function useSpeechFlow() {
     holdTimer.current = window.setTimeout(() => setPhase((p) => (p === 'PLAYING' ? 'IDLE' : p)), APP.resultHoldMs);
     k.setSpeechActive(false);
   }, [k]);
-
-  const callJbi = useCallback(() => {
-    k.callJbi('speech_to_sign', result?.phraseId ?? null, result?.confidence ?? 0);
-    reset();
-  }, [k, result, reset]);
 
   useEffect(() => () => window.clearTimeout(holdTimer.current), []);
 
@@ -157,6 +150,5 @@ export function useSpeechFlow() {
     reset,
     playPhrase,
     onVideoDone,
-    callJbi,
   };
 }

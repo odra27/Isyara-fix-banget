@@ -5,7 +5,7 @@ import type { Pt, SkeletonClip } from './types';
 
 /**
  * Pemutar animasi kerangka BISINDO dari rekaman asli (WL-BISINDO).
- * Ditampilkan TIDAK di-mirror, sama seperti di video aslinya: pasien melihat penanda isyarat
+ * Ditampilkan TIDAK di-mirror, sama seperti di video aslinya: siswa melihat penanda isyarat
  * seperti orang yang berdiri di depannya.
  *
  * Catatan: animasi ini tetap berjalan walau "kurangi gerakan" aktif, karena gerakan
@@ -29,10 +29,12 @@ type Props = {
   /** Indeks klip (kata) yang sedang diperagakan. */
   onSegment?: (i: number) => void;
   onDone?: () => void;
+  /** Kecepatan putar (1 = asli). Default SKELETON.speed. */
+  speed?: number;
   className?: string;
 };
 
-export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, className }: Props) {
+export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, speed = SKELETON.speed, className }: Props) {
   const data = useMemo(() => buildTimeline(clips), [clips]);
   const [t, setT] = useState(0);
   const cb = useRef({ onProgress, onSegment, onDone });
@@ -40,13 +42,13 @@ export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, 
   const seg = useRef(-1);
 
   useEffect(() => {
-    const total = SKELETON.holdStartMs + data.durationMs / SKELETON.speed + SKELETON.holdEndMs;
+    const total = SKELETON.holdStartMs + data.durationMs / speed + SKELETON.holdEndMs;
     const t0 = performance.now();
     let raf = 0;
     let done = false;
     const tick = (now: number) => {
       const elapsed = now - t0;
-      const clipT = Math.min(data.durationMs, Math.max(0, (elapsed - SKELETON.holdStartMs) * SKELETON.speed));
+      const clipT = Math.min(data.durationMs, Math.max(0, (elapsed - SKELETON.holdStartMs) * speed));
       setT(clipT);
       cb.current.onProgress?.(Math.min(1, elapsed / total));
       const i = Math.max(0, data.spans.findIndex((s) => clipT <= s.end));
@@ -65,7 +67,7 @@ export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, 
     seg.current = -1;
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [data, run]);
+  }, [data, run, speed]);
 
   const f = frameAt(data, t);
   const sw = data.shoulderW;

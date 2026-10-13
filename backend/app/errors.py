@@ -17,6 +17,9 @@ Each error carries a stable `code` and the approved HTTP status:
     STORAGE_ERROR         503   (reference upload, ADR-046)
     AUTH_UNAVAILABLE      503   (/api/admin/*, ADR-039; staff auth + login, ADR-047)
     INVALID_CREDENTIALS   401   (POST /api/auth/login, ADR-047 D5; one generic message)
+    CHAT_SESSION_NOT_FOUND 404  (/api/chat/*, ADR-051; also for another student's session)
+    CHAT_MODEL_UNAVAILABLE 503  (chatbot model / OpenRouter failure, ADR-051)
+    CHAT_MODEL_TIMEOUT    504   (chatbot model did not answer in time, ADR-051)
 
 Messages must never contain patient input (landmarks, audio, video) — ADR-012.
 """
@@ -130,3 +133,24 @@ class ModelingInternalError(BackendError):
 
     code = "INTERNAL_ERROR"
     http_status = 500
+
+
+class ChatSessionNotFound(BackendError):
+    """Chat session missing or owned by another student (ADR-051). Never reveals which."""
+
+    code = "CHAT_SESSION_NOT_FOUND"
+    http_status = 404
+
+
+class ChatModelUnavailable(BackendError):
+    """Chatbot model (OpenRouter) failed or answered unusably (ADR-051)."""
+
+    code = "CHAT_MODEL_UNAVAILABLE"
+    http_status = 503
+
+
+class ChatModelTimeout(BackendError):
+    """Chatbot model did not answer within the configured timeout (ADR-051)."""
+
+    code = "CHAT_MODEL_TIMEOUT"
+    http_status = 504

@@ -26,9 +26,13 @@ export type HandFrame = {
 };
 
 export type Direction = 'sign_to_text' | 'speech_to_sign';
+/**
+ * Nilai `escalated_to_jbi` tetap dipakai karena merupakan kontrak API BE (confidence < 0.60).
+ * Sejak ADR-051 FE TIDAK lagi menawarkan JBI: artinya cukup "isyarat belum dikenali".
+ */
 export type MatchAction = 'accepted' | 'confirmed' | 'escalated_to_jbi';
 
-/** Satu potongan kalimat petugas. phraseId null = kata di luar kosakata (tampil sebagai teks saja). */
+/** Satu potongan kalimat guru / jawaban. phraseId null = kata di luar kosakata (diberi gerakan buatan). */
 export type TextSegment = { phraseId: string | null; text: string };
 export type MatchResult = {
   phraseId: string | null;
@@ -53,10 +57,10 @@ export type LogEntry = {
   source: 'match' | 'user';
 };
 
-export type Speaker = 'pasien' | 'petugas';
+export type Speaker = 'siswa' | 'guru';
 export type Channel = 'isyarat' | 'suara' | 'ketik' | 'pilih-manual';
 
-/** Riwayat percakapan sesi ini. Hanya di memori, hilang saat halaman dimuat ulang (PRD §17). */
+/** Riwayat percakapan kiosk sesi ini. Hanya di memori, hilang saat halaman dimuat ulang (PRD §17). */
 export type ConversationItem = {
   id: string;
   from: Speaker | 'sistem';
@@ -66,7 +70,7 @@ export type ConversationItem = {
   at: number;
 };
 
-export type TabId = 'pasien' | 'petugas' | 'percakapan';
+export type TabId = 'siswa' | 'guru' | 'percakapan';
 
 /** Alasan sebuah sisi beralih ke mode ketik/pilih manual (PRD-FE §8). */
 export type FallbackReason = 'camera' | 'mic' | 'backend';

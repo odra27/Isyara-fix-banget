@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PhrasePicker } from '@/components/kiosk/PhrasePicker';
 import { ResultCard } from '@/components/kiosk/ResultCard';
 import { CAPTURE } from '@/config/capture.config';
-import { patientPhrases } from '@/data/phrases.mock';
+import { studentPhrases } from '@/data/phrases.mock';
 import { useCamera } from '@/hooks/useCamera';
 import { useKiosk } from '@/state/KioskContext';
 import { cn, isDevMode } from '@/lib/utils';
@@ -13,14 +13,14 @@ import { useHandTracking } from './useHandTracking';
 import { useSignFlow, type SignPhase } from './useSignFlow';
 
 /**
- * Panel Pasien (Alur A). Kamera + indikator status wajib (PRD-FE §4.2) + hasil (§6).
+ * Panel Siswa (Alur A, mode Kiosk kelas). Kamera + indikator status wajib (PRD-FE §4.2) + hasil (§6).
  * Semua status: warna + ikon + TEKS, dan diumumkan lewat aria-live.
  */
 const STATUS: Record<SignPhase, { text: string; sub: string }> = {
   IDLE: { text: 'Silakan mulai mengisyaratkan', sub: 'Gerakan terdeteksi otomatis. Tidak perlu menekan tombol.' },
   HAND_DETECTED: { text: 'Tangan terdeteksi', sub: 'Tahan sebentar…' },
   RECORDING: { text: 'Merekam…', sub: 'Diam sejenak atau turunkan tangan bila sudah selesai.' },
-  PROCESSING: { text: 'Memproses…', sub: 'Mencocokkan dengan frasa BISINDO tervalidasi.' },
+  PROCESSING: { text: 'Memproses…', sub: 'Mencocokkan dengan kosakata BISINDO terlatih.' },
   RESULT: { text: 'Selesai', sub: '' },
 };
 
@@ -54,12 +54,12 @@ export function SignPanel() {
   return (
     <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr] lg:gap-6">
       {/* ---------- Kamera ---------- */}
-      <section aria-label="Kamera pasien" className="flex flex-col gap-3">
+      <section aria-label="Kamera siswa" className="flex flex-col gap-3">
         {manual ? (
           <div className="rounded-[1.75rem] border border-line bg-white p-4 md:p-5">
             <p className="text-lg font-extrabold tracking-tight">Pilih yang ingin disampaikan</p>
-            <p className="mb-4 mt-1 text-sm text-muted">Mode manual aktif. Ketuk frasa, lalu frasa akan dibacakan untuk petugas.</p>
-            <PhrasePicker label="Frasa pasien" phrases={patientPhrases} onPick={(p) => flow.pickManual(p.id, p.text)} />
+            <p className="mb-4 mt-1 text-sm text-muted">Mode manual aktif. Ketuk frasa, lalu frasa akan dibacakan untuk guru.</p>
+            <PhrasePicker label="Frasa siswa" phrases={studentPhrases} onPick={(p) => flow.pickManual(p.id, p.text)} />
           </div>
         ) : (
           <div
@@ -157,7 +157,7 @@ export function SignPanel() {
                   ? 'Pendeteksi tangan gagal dimuat'
                   : paused
                     ? k.speechActive
-                      ? 'Menunggu petugas selesai…'
+                      ? 'Menunggu guru selesai…'
                       : 'Kamera dijeda'
                     : status.text}
             </div>
@@ -174,11 +174,11 @@ export function SignPanel() {
       </section>
 
       {/* ---------- Status & hasil ---------- */}
-      <section aria-label="Hasil untuk petugas" className="flex flex-col">
+      <section aria-label="Hasil untuk guru" className="flex flex-col">
         <div aria-live="polite" className="sr-only">
           {phase === 'RESULT' && flow.result
             ? flow.result.action === 'escalated_to_jbi'
-              ? 'Tidak ada frasa yang cocok'
+              ? 'Isyarat belum dikenali'
               : `${flow.result.action === 'confirmed' ? 'Kemungkinan maksud: ' : ''}${flow.result.phraseText}`
             : status.text}
         </div>
@@ -188,12 +188,13 @@ export function SignPanel() {
             <ResultCard
               key="result"
               result={flow.result}
-              acceptedLabel="Pasien menyampaikan"
-              confirmLabel="Kemungkinan maksud Anda"
+              acceptedLabel="Siswa menyampaikan"
+              confirmLabel="Maksudmu ini?"
+              speakingLabel="Sedang dibacakan untuk guru"
               speaking={k.ttsSpeaking}
               onConfirm={flow.confirm}
               onRetry={flow.retry}
-              onJbi={flow.callJbi}
+              unknownBody="Kami tidak mau menebak. Coba isyaratkan sekali lagi dengan pelan, atau pilih frasa secara manual."
             />
           ) : (
             <motion.div

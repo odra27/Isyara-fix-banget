@@ -492,27 +492,37 @@ def test_exact_production_route_surface():
     app = create_app(modeling_factory=lambda: LibraryModelingClient(
         FakePredictor()), open_db=FakeDb().open)
     all_paths = sorted(p for _, paths in _mounted_routers(app) for p in paths)
-    # Phase 5B admin endpoints (ADR-041/042/043/046); no DELETE. Staff login/profile (ADR-047).
+    # Phase 5B admin endpoints (ADR-041/042/043/046); no admin DELETE. Staff login/profile (ADR-047).
+    # Student login/profile + chatbot (ADR-051); the only DELETE is a student's own chat session.
     assert all_paths == [
+        ("DELETE", "/api/chat/sessions/{session_id}"),
         ("GET", "/api/admin/devices"),
         ("GET", "/api/admin/logs"),
         ("GET", "/api/admin/phrases"),
         ("GET", "/api/admin/staff"),
+        ("GET", "/api/chat/sessions"),
+        ("GET", "/api/chat/sessions/{session_id}/messages"),
         ("GET", "/api/devices/{device_id}/status"),
         ("GET", "/api/health"),
         ("GET", "/api/kiosk/queue/current"),
         ("GET", "/api/me"),
         ("GET", "/api/phrases"),
         ("GET", "/api/staff/logs"),
+        ("GET", "/api/student/me"),
         ("PATCH", "/api/admin/phrases/{phrase_id}"),
+        ("PATCH", "/api/chat/sessions/{session_id}"),
         ("POST", "/api/admin/phrases"),
         ("POST", "/api/admin/phrases/{phrase_id}/references"),
         ("POST", "/api/admin/staff"),
         ("POST", "/api/auth/login"),
+        ("POST", "/api/chat/sessions"),
+        ("POST", "/api/chat/sessions/{session_id}/messages"),
         ("POST", "/api/devices/{device_id}/heartbeat"),
         ("POST", "/api/kiosk/call-jbi"),
         ("POST", "/api/logs"),
         ("POST", "/api/match/sign"),
+        ("POST", "/api/student/auth/login"),
+        ("POST", "/api/student/auth/refresh"),
     ]
 
 

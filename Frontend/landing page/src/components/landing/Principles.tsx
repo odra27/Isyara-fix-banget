@@ -7,17 +7,17 @@ const ITEMS: { icon: IconName; title: string; desc: string }[] = [
   {
     icon: 'target',
     title: 'Bukan penerjemah umum',
-    desc: 'Cakupannya jelas: frasa layanan Puskesmas. Untuk percakapan kompleks atau darurat, JBI manusia tetap yang utama.',
+    desc: 'Pengenalan isyarat fokus pada 43 kata BISINDO terlatih. Untuk kalimat lain, siswa tetap bisa mengetik.',
   },
   {
     icon: 'eyeOff',
-    title: 'Rekaman pasien tidak disimpan',
-    desc: 'Titik gerak tangan hanya ada di memori sementara dan dibuang setelah diproses.',
+    title: 'Kamera tidak direkam',
+    desc: 'Titik gerak tangan hanya diproses di memori sementara lalu dibuang. Yang disimpan hanya teks riwayat chat siswa.',
   },
   {
-    icon: 'users',
-    title: 'Divalidasi komunitas',
-    desc: 'Kosakata dan video referensi disusun bersama komunitas Tuli dan JBI BISINDO.',
+    icon: 'sparkles',
+    title: 'AI membantu, guru tetap utama',
+    desc: 'Jawaban chatbot bisa saja keliru. Gunakan sebagai teman belajar, dan cek kembali bersama guru bila ragu.',
   },
   {
     icon: 'keyboard',

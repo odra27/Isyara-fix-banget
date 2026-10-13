@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { APP } from '@/config/app.config';
 
 /**
- * Text-to-speech (Web Speech API, id-ID). Hasil Alur A dibacakan untuk petugas.
+ * Text-to-speech (Web Speech API, id-ID). Hasil isyarat siswa / jawaban chatbot dibacakan.
  * `speaking` tetap true selama TTS + ttsCooldownMs, dipakai untuk mem-pause STT (anti feedback loop).
  * Jika browser tidak mendukung TTS, teks tetap tampil di layar (tidak ada info yang hanya lewat suara).
  */

@@ -6,27 +6,28 @@ import { Icon } from '../ui/Icon';
 /**
  * Intro scroll "pin + circle reveal" (prompt animasi §11), diadaptasi tanpa video & tanpa Lenis.
  * Cleanup memakai gsap.context (useGSAP), bukan ScrollTrigger.getAll().kill().
+ * Isi: contoh percakapan mode kiosk antara siswa Tuli dan guru di kelas.
  */
 type Turn = {
-  who: 'pasien' | 'petugas' | 'unknown';
+  who: 'siswa' | 'guru' | 'unknown';
   label: string;
   text: string;
   meta: string;
 };
 
 const TURNS: Turn[] = [
-  { who: 'pasien', label: 'Pasien · isyarat', text: 'Saya demam', meta: '94% · langsung jadi teks + suara' },
+  { who: 'siswa', label: 'Siswa · isyarat', text: 'Selamat pagi', meta: '94% · langsung jadi teks + suara' },
   {
-    who: 'petugas',
-    label: 'Petugas · suara',
-    text: '“Demamnya sudah berapa hari, Bu?”',
-    meta: 'Dicocokkan ke “Sudah berapa hari?” · video BISINDO',
+    who: 'guru',
+    label: 'Guru · suara',
+    text: '“Pagi! Hari ini kita belajar siklus air.”',
+    meta: 'Tampil sebagai teks + isyarat BISINDO',
   },
-  { who: 'pasien', label: 'Pasien · isyarat', text: 'Saya butuh resep', meta: '72% · pasien konfirmasi dulu' },
-  { who: 'unknown', label: 'Pasien · isyarat', text: 'Gerakan di luar kosakata', meta: 'Tidak menebak · tawarkan Panggil JBI' },
+  { who: 'siswa', label: 'Siswa · isyarat', text: 'Bingung', meta: '72% · siswa konfirmasi dulu' },
+  { who: 'unknown', label: 'Siswa · isyarat', text: 'Gerakan di luar kosakata', meta: 'Belum dikenali · ulangi atau ketik saja' },
 ];
 
-const TAGS = ['Pendaftaran', 'Keluhan', 'Obat', 'Administrasi'];
+const TAGS = ['Sapaan', 'Pertanyaan', 'Di kelas', 'Perasaan'];
 
 export function RevealScene() {
   const root = useRef<HTMLElement>(null);
@@ -66,7 +67,7 @@ export function RevealScene() {
       {/* Lapisan 1: pernyataan */}
       <div className="wrap flex h-full flex-col items-center justify-center pb-24 text-center">
         <p className="js-reveal-title max-w-[900px] text-[clamp(38px,8.5vw,84px)] font-extrabold leading-[0.98] tracking-[-0.06em]">
-          Satu perangkat. Dua arah. Di meja layanan.
+          Satu perangkat. Dua arah. Di dalam kelas.
         </p>
         <p className="js-seed-label invisible absolute bottom-[12%] text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
           Gulir untuk melihat percakapan
@@ -77,15 +78,15 @@ export function RevealScene() {
       <div className="js-circle absolute inset-0 bg-brand-900 text-white [clip-path:circle(3.2%_at_50%_80%)]">
         <div className="wrap grid h-full content-center gap-7 pb-6 pt-20 md:grid-cols-[1fr_1.15fr] md:items-center md:gap-16">
           <div className="js-scene-head">
-            <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand-200">Contoh di loket Puskesmas</p>
+            <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand-200">Mode kiosk · contoh di kelas</p>
             <h2 className="mt-3 text-[clamp(30px,6vw,58px)] font-extrabold leading-[0.98] tracking-[-0.055em]">
-              Pasien mengisyaratkan.
+              Siswa mengisyaratkan.
               <br />
-              <span className="text-brand-200">Petugas cukup bicara.</span>
+              <span className="text-brand-200">Guru cukup bicara.</span>
             </h2>
             <p className="mt-4 hidden max-w-[400px] text-[14px] leading-relaxed text-brand-100 md:block">
-              Kamera dan layar menghadap pasien. Speaker dan mic untuk petugas. Tidak perlu akun, tidak perlu pairing
-              dua perangkat.
+              Kamera dan layar menghadap siswa. Speaker dan mic untuk guru. Cukup satu perangkat di meja, tanpa perlu
+              menyambungkan dua perangkat.
             </p>
             <ul className="mt-5 hidden flex-wrap gap-2 md:flex" aria-label="Kategori kosakata">
               {TAGS.map((t) => (
@@ -100,15 +101,15 @@ export function RevealScene() {
             {TURNS.map((t, i) => (
               <li
                 key={i}
-                className={`js-turn flex max-w-[88%] flex-col ${t.who === 'petugas' ? 'items-end self-end text-right' : 'items-start'}`}
+                className={`js-turn flex max-w-[88%] flex-col ${t.who === 'guru' ? 'items-end self-end text-right' : 'items-start'}`}
               >
                 <span className="mb-1 flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-brand-200">
-                  <Icon name={t.who === 'petugas' ? 'mic' : 'hand'} className="size-3" />
+                  <Icon name={t.who === 'guru' ? 'mic' : 'hand'} className="size-3" />
                   {t.label}
                 </span>
                 <span
                   className={`rounded-2xl px-4 py-2.5 text-[15px] font-bold leading-snug md:text-[17px] ${
-                    t.who === 'petugas'
+                    t.who === 'guru'
                       ? 'rounded-tr-md bg-brand-600'
                       : t.who === 'unknown'
                         ? 'rounded-tl-md border border-dashed border-white/35 text-brand-100'

@@ -12,13 +12,19 @@ Jika terdapat konflik antara implementasi, instruksi task, dan dokumen project, 
 
 # 1. Project Context
 
-Project ini adalah kiosk satu-device untuk membantu komunikasi dua arah antara pasien Tuli dan petugas Puskesmas.
+> **ADR-051 (2026-10-13):** domain project berpindah dari Puskesmas ke **edukasi**. Brand tetap ISYARA.
+> Pengguna utama adalah siswa Tuli yang login dengan NIS (akun dibuat sekolah). Fitur: materi
+> pembelajaran (dummy), chatbot (OpenRouter lewat Backend, riwayat per siswa), dan Mode Kiosk kelas
+> (siswa ↔ guru). Eskalasi JBI dihapus dari Frontend. Bila bagian di bawah masih menyebut
+> Puskesmas / pasien / petugas / JBI, ADR-051 yang berlaku.
+
+Project ini adalah platform belajar inklusif untuk siswa Tuli, dengan mode kiosk satu-device untuk komunikasi dua arah antara siswa dan guru di kelas.
 
 Dua alur utama:
 
 1. **Sign → Text/Speech**
 
-   * Pasien mengisyaratkan ke kamera.
+   * Siswa mengisyaratkan ke kamera.
    * FE melakukan auto-capture landmark.
    * Backend menerima sequence landmark.
    * Modeling melakukan closed-vocabulary matching.
@@ -27,7 +33,7 @@ Dua alur utama:
 
 2. **Speech/Text → Sign**
 
-   * Petugas berbicara atau mengetik.
+   * Guru berbicara atau mengetik.
    * FE menghasilkan teks.
    * Backend meneruskan utterance ke Modeling.
    * Modeling melakukan semantic matching.
@@ -38,7 +44,14 @@ Sistem **bukan general-purpose BISINDO translator**.
 
 Framing produk:
 
-> AI membantu mengenali sejumlah frasa BISINDO yang telah divalidasi untuk skenario layanan Puskesmas.
+> AI membantu mengenali sejumlah kosakata BISINDO yang telah divalidasi untuk kegiatan belajar.
+
+3. **Chatbot siswa (ADR-051)**
+
+   * Siswa mengetik atau mengisyaratkan pertanyaan (isyarat → teks lewat `/api/match/sign`).
+   * Backend meneruskan teks ke OpenRouter (API key hanya di Backend; tanpa key = mode offline).
+   * Riwayat chat (teks saja) disimpan per siswa di `chat_sessions` / `chat_messages`.
+   * FE menampilkan jawaban sebagai teks, TTS, dan animasi isyarat (kata di luar 43 kosakata memakai gerakan buatan yang dijamin berbeda dari gerakan terlatih).
 
 ---
 
@@ -582,14 +595,17 @@ Jangan membuat fallback nearest-match yang memaksa prediction ketika confidence 
 
 # 21. Scope Control
 
-MVP hanya mencakup:
+MVP hanya mencakup (diperbarui ADR-051):
 
-* kiosk satu device,
-* domain Puskesmas,
+* akun siswa (login NIS, dibuat sekolah),
+* materi pembelajaran dummy + Materi Saya,
+* chatbot siswa + riwayat chat,
+* kiosk satu device (mode kelas siswa ↔ guru),
+* domain edukasi,
 * 5–10 demo phrases,
 * sign → text/speech,
 * speech/text → sign,
-* JBI escalation,
+* fallback "isyarat belum dikenali" (eskalasi JBI dihapus dari FE, ADR-051 D7),
 * auto-capture integration,
 * logging,
 * admin API dasar,
@@ -600,8 +616,8 @@ Di luar scope:
 * multi-device session,
 * room code,
 * QR pairing,
-* patient account,
-* petugas account,
+* akun guru (belum, ADR-051 open item 4),
+* registrasi mandiri siswa,
 * general BISINDO translation,
 * generative 3D avatar,
 * community submission API,
@@ -817,7 +833,7 @@ Prinsip utama project:
 
 > **Correctness > feature count.**
 
-Dan khusus untuk sistem komunikasi kesehatan:
+Dan khusus untuk sistem komunikasi belajar siswa Tuli:
 
 > **Mengatakan "tidak yakin" lebih baik daripada memberikan hasil yang salah dengan percaya diri.**
 

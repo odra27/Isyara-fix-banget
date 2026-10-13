@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Level suara mic real-time (AnalyserNode) untuk visual "suara tertangkap" saat petugas bicara.
+ * Level suara mic real-time (AnalyserNode) untuk visual "suara tertangkap" saat guru bicara.
  * Mengembalikan `bars` nilai 0–1, atau null bila mic tidak bisa dibaca (UI memakai animasi cadangan).
  * Audio hanya dianalisis di memori, tidak direkam atau dikirim ke mana pun.
  */

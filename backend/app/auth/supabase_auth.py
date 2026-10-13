@@ -82,20 +82,33 @@ class SupabaseAuthClient:
             )
         except httpx.HTTPError:
             raise AuthUnavailable(_UNAVAILABLE) from None
-        if r.status_code in _CREDENTIAL_FAILURE_STATUSES:
-            raise InvalidCredentials(_INVALID)
-        if r.status_code != 200:
-            raise AuthUnavailable(_UNAVAILABLE)
+        return _grant_from(r)
+
+    async def refresh_grant(self, refresh_token: str) -> TokenGrant:
+        """`POST /token?grant_type=refresh_token` (ADR-052). Same status mapping as password_grant;
+        an expired / revoked / already-used refresh token maps to InvalidCredentials."""
         try:
-            data = r.json()
-            access, refresh, expires = data["access_token"], data["refresh_token"], data["expires_in"]
-        except (ValueError, KeyError, TypeError):
+            r = await self._client.post("/token", params={"grant_type": "refresh_token"}, json={"refresh_token": refresh_token})
+        except httpx.HTTPError:
             raise AuthUnavailable(_UNAVAILABLE) from None
-        if not (isinstance(access, str) and access and isinstance(refresh, str) and refresh):
-            raise AuthUnavailable(_UNAVAILABLE)
-        if isinstance(expires, bool) or not isinstance(expires, int) or expires <= 0:
-            raise AuthUnavailable(_UNAVAILABLE)
-        return TokenGrant(access_token=access, refresh_token=refresh, expires_in=expires)
+        return _grant_from(r)
 
     async def aclose(self) -> None:
         await self._client.aclose()
+
+
+def _grant_from(r: httpx.Response) -> TokenGrant:
+    if r.status_code in _CREDENTIAL_FAILURE_STATUSES:
+        raise InvalidCredentials(_INVALID)
+    if r.status_code != 200:
+        raise AuthUnavailable(_UNAVAILABLE)
+    try:
+        data = r.json()
+        access, refresh, expires = data["access_token"], data["refresh_token"], data["expires_in"]
+    except (ValueError, KeyError, TypeError):
+        raise AuthUnavailable(_UNAVAILABLE) from None
+    if not (isinstance(access, str) and access and isinstance(refresh, str) and refresh):
+        raise AuthUnavailable(_UNAVAILABLE)
+    if isinstance(expires, bool) or not isinstance(expires, int) or expires <= 0:
+        raise AuthUnavailable(_UNAVAILABLE)
+    return TokenGrant(access_token=access, refresh_token=refresh, expires_in=expires)

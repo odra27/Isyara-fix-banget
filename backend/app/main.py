@@ -12,6 +12,9 @@ framework docs/OpenAPI routes are disabled. `/api/admin/*` is mounted through th
 router, whose `require_admin` dependency enforces ADR-039. Staff login and profile
 (POST /api/auth/login, GET /api/me) follow ADR-047; the Supabase Auth client is created
 once at startup — if its configuration is missing, login answers 503 AUTH_UNAVAILABLE.
+Student login / profile (POST /api/student/auth/login, GET /api/student/me) and the chatbot
+(/api/chat/*) follow ADR-051; the chat model is OpenRouter when OPENROUTER_API_KEY is set,
+otherwise an offline stand-in that answers honestly that no model is connected.
 Errors use the ADR-037 envelope. No request bodies are logged.
 """
 from __future__ import annotations
@@ -27,7 +30,10 @@ from fastapi.responses import JSONResponse
 
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
+from app.api.chat import router as chat_router
 from app.api.kiosk import router as kiosk_router
+from app.api.student import router as student_router
+from app.chat.model import ChatModel, OfflineChatModel, chat_model_from_env
 from app.api.errors import from_backend_error, from_error_list, from_unexpected_error
 from app.api.health import router as health_router
 from app.api.logs import router as logs_router
@@ -46,6 +52,7 @@ JwtVerifierFactory = Callable[[], JwtVerifier]
 StorageFactory = Callable[[], SupabaseStorage]
 AuthClientFactory = Callable[[], SupabaseAuthClient]
 AuthAdminFactory = Callable[[], SupabaseAdminClient]
+ChatModelFactory = Callable[[], ChatModel]
 
 # Origin FE yang boleh memanggil API dari browser. Default = Vite dev server lokal
 # (main: 5174, landing: 5173). Production: set CORS_ALLOW_ORIGINS (dipisah koma).
@@ -68,6 +75,7 @@ def create_app(
     storage_factory: StorageFactory = SupabaseStorage.from_env,
     auth_client_factory: AuthClientFactory = SupabaseAuthClient.from_env,
     auth_admin_factory: AuthAdminFactory = SupabaseAdminClient.from_env,
+    chat_model_factory: ChatModelFactory = chat_model_from_env,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -97,6 +105,11 @@ def create_app(
             app.state.auth_admin = auth_admin_factory()
         except Exception:
             app.state.auth_admin = None
+        # Chatbot model (ADR-051 D3). A broken config falls back to the offline stand-in.
+        try:
+            app.state.chat_model = chat_model_factory()
+        except Exception:
+            app.state.chat_model = OfflineChatModel()
         try:
             yield
         finally:
@@ -109,6 +122,8 @@ def create_app(
                 await app.state.auth_client.aclose()
             if app.state.auth_admin is not None:
                 await app.state.auth_admin.aclose()
+            if app.state.chat_model is not None:
+                await app.state.chat_model.aclose()
 
     app = FastAPI(lifespan=lifespan, docs_url=None,
                   redoc_url=None, openapi_url=None)
@@ -117,6 +132,7 @@ def create_app(
     app.state.storage = None
     app.state.auth_client = None
     app.state.auth_admin = None
+    app.state.chat_model = None
     app.state.open_db = open_db
 
     # Tanpa ini browser memblokir semua request FE (beda port = beda origin).
@@ -124,7 +140,7 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins(),
-        allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type"],
         max_age=600,
     )
@@ -152,6 +168,8 @@ def create_app(
     app.include_router(auth_router)  # /api/auth/login, /api/me (ADR-047)
     # heartbeat/status, call-jbi, demo queue, staff logs (ADR-047)
     app.include_router(kiosk_router)
+    app.include_router(student_router)  # /api/student/auth/login, /api/student/me (ADR-051)
+    app.include_router(chat_router)  # /api/chat/* (ADR-051)
     app.include_router(health_router)  # GET /api/health (dev/ops check)
     return app
 

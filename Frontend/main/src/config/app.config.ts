@@ -9,7 +9,7 @@ export const APP = {
   useBackend: Boolean(import.meta.env.VITE_API_BASE_URL),
   apiBaseUrl: (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, ''),
   /**
-   * Login petugas: 'api' = Supabase lewat BE, 'mock' = akun demo di browser.
+   * Login siswa: 'api' = Supabase lewat BE, 'mock' = akun demo di browser.
    * Default ikut useBackend. Set VITE_AUTH_MODE=mock saat BE jalan tanpa Supabase (LOCAL_DEV_DB=1).
    */
   authMode: (import.meta.env.VITE_AUTH_MODE || (import.meta.env.VITE_API_BASE_URL ? 'api' : 'mock')) as 'api' | 'mock',

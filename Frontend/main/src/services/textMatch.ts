@@ -2,7 +2,7 @@ import { VOCABULARY } from '@/data/vocabulary';
 import type { TextSegment } from '@/types/kiosk';
 
 /**
- * Tokenizer teks petugas → urutan kata kosakata (ADR-050, sementara di FE).
+ * Tokenizer teks guru / jawaban chatbot → urutan kata kosakata (ADR-050, sementara di FE).
  *
  *   "Halo, selamat pagi! Apa kabarnya?" → [Halo] [Selamat pagi] [Apa kabar]
  *
@@ -34,6 +34,27 @@ const FORMS: Form[] = VOCABULARY.flatMap((v) =>
   .sort((a, b) => b.tokens.length - a.tokens.length);
 
 const sameWord = (spoken: string, form: string) => spoken === form || SUFFIXES.some((s) => spoken === form + s);
+
+/**
+ * Seperti tokenizeUtterance, tetapi kata di luar kosakata TIDAK digabung: tiap kata jadi segmen
+ * sendiri, supaya masing-masing bisa diberi gerakan buatan (ADR-051 D5).
+ */
+export function tokenizeWords(utterance: string): TextSegment[] {
+  const tokens = normalizeTokens(utterance);
+  const out: TextSegment[] = [];
+  let i = 0;
+  while (i < tokens.length) {
+    const hit = FORMS.find((f) => f.tokens.length <= tokens.length - i && f.tokens.every((t, k) => sameWord(tokens[i + k], t)));
+    if (hit) {
+      out.push({ phraseId: hit.phraseId, text: hit.text });
+      i += hit.tokens.length;
+    } else {
+      out.push({ phraseId: null, text: tokens[i] });
+      i++;
+    }
+  }
+  return out;
+}
 
 export function tokenizeUtterance(utterance: string): TextSegment[] {
   const tokens = normalizeTokens(utterance);

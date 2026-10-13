@@ -11,13 +11,13 @@ import type { FallbackReason } from '@/types/kiosk';
  */
 const COPY: Record<'sign' | 'speech', Record<FallbackReason, { title: string; body: string; retry: string }>> = {
   sign: {
-    camera: { title: 'Kamera tidak tersedia', body: 'Sisi pasien beralih ke pilih frasa manual.', retry: 'Coba aktifkan kamera' },
-    backend: { title: 'Koneksi ke server terputus', body: 'Sisi pasien beralih ke pilih frasa manual.', retry: 'Coba sambungkan lagi' },
+    camera: { title: 'Kamera tidak tersedia', body: 'Sisi siswa beralih ke pilih frasa manual.', retry: 'Coba aktifkan kamera' },
+    backend: { title: 'Koneksi ke server terputus', body: 'Sisi siswa beralih ke pilih frasa manual.', retry: 'Coba sambungkan lagi' },
     mic: { title: '', body: '', retry: '' },
   },
   speech: {
-    mic: { title: 'Mic tidak tersedia', body: 'Petugas bisa mengetik kalimat. Pencocokan tetap berjalan.', retry: 'Coba aktifkan mic' },
-    backend: { title: 'Koneksi ke server terputus', body: 'Teks petugas langsung ditampilkan ke pasien.', retry: 'Coba sambungkan lagi' },
+    mic: { title: 'Mic tidak tersedia', body: 'Guru bisa mengetik kalimat. Animasi isyarat tetap berjalan.', retry: 'Coba aktifkan mic' },
+    backend: { title: 'Koneksi ke server terputus', body: 'Teks guru langsung ditampilkan ke siswa.', retry: 'Coba sambungkan lagi' },
     camera: { title: '', body: '', retry: '' },
   },
 };
@@ -52,7 +52,7 @@ export function FallbackNotices() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-extrabold">
                   <span className="mr-1.5 rounded-md bg-brand-50 px-1.5 py-0.5 text-[0.6875rem] font-bold text-brand-600">
-                    {it.side === 'sign' ? 'Pasien' : 'Petugas'}
+                    {it.side === 'sign' ? 'Siswa' : 'Guru'}
                   </span>
                   {c.title}
                 </p>

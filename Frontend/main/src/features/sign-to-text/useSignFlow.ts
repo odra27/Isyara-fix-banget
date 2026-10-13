@@ -9,7 +9,7 @@ import { useAutoCapture } from './useAutoCapture';
 
 /**
  * Alur A: isyarat → teks + suara (PRD-FE §4 & §6).
- * IDLE → HAND_DETECTED → RECORDING → PROCESSING → RESULT(accepted | confirmed | escalated_to_jbi) → IDLE
+ * IDLE → HAND_DETECTED → RECORDING → PROCESSING → RESULT(accepted | confirmed | belum dikenali) → IDLE
  */
 export type SignPhase = 'IDLE' | 'HAND_DETECTED' | 'RECORDING' | 'PROCESSING' | 'RESULT';
 
@@ -20,14 +20,14 @@ export function useSignFlow(active: boolean) {
   const holdTimer = useRef<number | undefined>(undefined);
   const reqId = useRef(0);
 
-  // Auto-capture hanya jalan bila panel aktif, tidak eskalasi, tidak sedang proses/hasil,
-  // dan petugas tidak sedang bicara/memutar video isyarat (arbitrase PRD-FE §7.3).
-  const captureEnabled = active && !k.escalated && !k.speechActive && stage === 'capture' && k.signFallback === null;
+  // Auto-capture hanya jalan bila panel aktif, tidak sedang proses/hasil,
+  // dan guru tidak sedang bicara/memutar animasi isyarat (arbitrase PRD-FE §7.3).
+  const captureEnabled = active && !k.speechActive && stage === 'capture' && k.signFallback === null;
 
   const deliver = useCallback(
     (r: MatchResult, channel: 'isyarat' | 'pilih-manual') => {
       if (!r.phraseText) return;
-      k.say({ from: 'pasien', text: r.phraseText, channel, confidence: r.confidence });
+      k.say({ from: 'siswa', text: r.phraseText, channel, confidence: r.confidence });
       void k.speak(r.phraseText);
     },
     [k],
@@ -92,12 +92,7 @@ export function useSignFlow(active: boolean) {
     holdThenIdle();
   }, [result, deliver, holdThenIdle]);
 
-  const callJbi = useCallback(() => {
-    k.callJbi('sign_to_text', result?.phraseId ?? null, result?.confidence ?? 0);
-    retry();
-  }, [k, result, retry]);
-
-  /** Mode fallback: pasien memilih frasa langsung (tanpa kamera/BE). */
+  /** Mode fallback: siswa memilih frasa langsung (tanpa kamera/BE). */
   const pickManual = useCallback(
     (phraseId: string, text: string) => {
       const r: MatchResult = { phraseId, phraseText: text, confidence: 1, action: 'accepted' };
@@ -118,5 +113,5 @@ export function useSignFlow(active: boolean) {
   useEffect(() => () => window.clearTimeout(holdTimer.current), []);
 
   const phase: SignPhase = stage === 'capture' ? capture.phase : stage;
-  return { phase, result, debug: capture.debug, captureEnabled, retry, confirm, callJbi, pickManual };
+  return { phase, result, debug: capture.debug, captureEnabled, retry, confirm, pickManual };
 }
