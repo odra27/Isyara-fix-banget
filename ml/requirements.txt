@@ -1,0 +1,13 @@
+mediapipe==0.10.35
+opencv-python==4.11.0.86
+numpy==2.2.6
+pandas==2.3.3
+scikit-learn==1.7.2
+torch==2.8.0
+onnx==1.19.1
+onnxruntime==1.23.2
+pydantic==2.11.9
+pyyaml==6.0.3
+matplotlib==3.10.6
+tqdm==4.67.1
+pytest==8.4.2

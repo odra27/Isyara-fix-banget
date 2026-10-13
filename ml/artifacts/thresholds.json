@@ -1,0 +1,11 @@
+{
+  "temperature": 0.7808654567638361,
+  "raw_accept": 0.85,
+  "raw_accept_auto": 0.985,
+  "raw_confirm": 0.67,
+  "centroid_sim_min": 0.5,
+  "kiosk_accept": 0.65,
+  "kiosk_confirm": 0.6,
+  "source_run": "gru_v43",
+  "hidden_run": null
+}

@@ -1,0 +1,25 @@
+{
+  "pose_points": [
+    0,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "max_gap_frames": 5,
+  "rest_mask_y": 1.35,
+  "T": 48,
+  "use_pose": true,
+  "use_velocity": true,
+  "trim": {
+    "enabled": true,
+    "motion_threshold": 0.02,
+    "smooth_window": 3,
+    "pad_frames": 3,
+    "max_still_edge_frames": 10,
+    "min_keep_frames": 8
+  },
+  "min_frames_for_inference": 8
+}

@@ -1,0 +1,40 @@
+{
+  "name": "isyara-kiosk",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "assets": "node scripts/copy-mediapipe.mjs",
+    "predev": "npm run assets",
+    "dev": "vite",
+    "predev:https": "npm run assets",
+    "dev:https": "cross-env VITE_HTTPS=1 vite",
+    "prebuild": "npm run assets",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
+    "@mediapipe/tasks-vision": "1.0.1",
+    "clsx": "2.1.1",
+    "framer-motion": "13.4.4",
+    "lucide-react": "1.48.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router-dom": "7.18.4",
+    "tailwind-merge": "3.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-basic-ssl": "2.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "cross-env": "10.1.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.1"
+  }
+}

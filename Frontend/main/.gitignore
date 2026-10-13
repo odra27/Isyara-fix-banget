@@ -1,0 +1,5 @@
+node_modules
+dist
+*.local
+# disalin otomatis oleh scripts/copy-mediapipe.mjs
+public/mediapipe

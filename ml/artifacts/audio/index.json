@@ -1,0 +1,178 @@
+﻿{
+    "voice":  "Microsoft Andika",
+    "language":  "id-ID",
+    "files":  {
+                  "label_00":  {
+                                   "text":  "Air",
+                                   "file":  "label_00.wav"
+                               },
+                  "label_01":  {
+                                   "text":  "Belajar",
+                                   "file":  "label_01.wav"
+                               },
+                  "label_02":  {
+                                   "text":  "Cari",
+                                   "file":  "label_02.wav"
+                               },
+                  "label_03":  {
+                                   "text":  "Hari",
+                                   "file":  "label_03.wav"
+                               },
+                  "label_04":  {
+                                   "text":  "Ingat",
+                                   "file":  "label_04.wav"
+                               },
+                  "label_05":  {
+                                   "text":  "Lagi",
+                                   "file":  "label_05.wav"
+                               },
+                  "label_06":  {
+                                   "text":  "Maaf",
+                                   "file":  "label_06.wav"
+                               },
+                  "label_07":  {
+                                   "text":  "Makan",
+                                   "file":  "label_07.wav"
+                               },
+                  "label_08":  {
+                                   "text":  "Motor",
+                                   "file":  "label_08.wav"
+                               },
+                  "label_09":  {
+                                   "text":  "Saya",
+                                   "file":  "label_09.wav"
+                               },
+                  "label_10":  {
+                                   "text":  "Terima kasih",
+                                   "file":  "label_10.wav"
+                               },
+                  "label_11":  {
+                                   "text":  "Tuli",
+                                   "file":  "label_11.wav"
+                               },
+                  "label_12":  {
+                                   "text":  "Apa",
+                                   "file":  "label_12.wav"
+                               },
+                  "label_13":  {
+                                   "text":  "Siapa",
+                                   "file":  "label_13.wav"
+                               },
+                  "label_14":  {
+                                   "text":  "Kapan",
+                                   "file":  "label_14.wav"
+                               },
+                  "label_15":  {
+                                   "text":  "Di mana",
+                                   "file":  "label_15.wav"
+                               },
+                  "label_16":  {
+                                   "text":  "Mengapa",
+                                   "file":  "label_16.wav"
+                               },
+                  "label_17":  {
+                                   "text":  "Bagaimana",
+                                   "file":  "label_17.wav"
+                               },
+                  "label_18":  {
+                                   "text":  "Merah",
+                                   "file":  "label_18.wav"
+                               },
+                  "label_19":  {
+                                   "text":  "Kuning",
+                                   "file":  "label_19.wav"
+                               },
+                  "label_20":  {
+                                   "text":  "Hijau",
+                                   "file":  "label_20.wav"
+                               },
+                  "label_21":  {
+                                   "text":  "Hitam",
+                                   "file":  "label_21.wav"
+                               },
+                  "label_22":  {
+                                   "text":  "Dengar",
+                                   "file":  "label_22.wav"
+                               },
+                  "label_23":  {
+                                   "text":  "Berangkat",
+                                   "file":  "label_23.wav"
+                               },
+                  "label_24":  {
+                                   "text":  "Datang",
+                                   "file":  "label_24.wav"
+                               },
+                  "label_25":  {
+                                   "text":  "Teman",
+                                   "file":  "label_25.wav"
+                               },
+                  "label_26":  {
+                                   "text":  "Keluarga",
+                                   "file":  "label_26.wav"
+                               },
+                  "label_27":  {
+                                   "text":  "Rumah",
+                                   "file":  "label_27.wav"
+                               },
+                  "label_28":  {
+                                   "text":  "Pagi",
+                                   "file":  "label_28.wav"
+                               },
+                  "label_29":  {
+                                   "text":  "Siang",
+                                   "file":  "label_29.wav"
+                               },
+                  "label_30":  {
+                                   "text":  "Sore",
+                                   "file":  "label_30.wav"
+                               },
+                  "label_31":  {
+                                   "text":  "Malam",
+                                   "file":  "label_31.wav"
+                               },
+                  "label_32":  {
+                                   "text":  "Apa kabar",
+                                   "file":  "label_32.wav"
+                               },
+                  "label_33":  {
+                                   "text":  "Baik",
+                                   "file":  "label_33.wav"
+                               },
+                  "label_34":  {
+                                   "text":  "Berapa",
+                                   "file":  "label_34.wav"
+                               },
+                  "label_35":  {
+                                   "text":  "Bingung",
+                                   "file":  "label_35.wav"
+                               },
+                  "label_36":  {
+                                   "text":  "Halo",
+                                   "file":  "label_36.wav"
+                               },
+                  "label_37":  {
+                                   "text":  "Kamu",
+                                   "file":  "label_37.wav"
+                               },
+                  "label_38":  {
+                                   "text":  "Tidur",
+                                   "file":  "label_38.wav"
+                               },
+                  "label_39":  {
+                                   "text":  "Selamat siang",
+                                   "file":  "label_39.wav"
+                               },
+                  "label_40":  {
+                                   "text":  "Selamat sore",
+                                   "file":  "label_40.wav"
+                               },
+                  "label_41":  {
+                                   "text":  "Selamat pagi",
+                                   "file":  "label_41.wav"
+                               },
+                  "label_42":  {
+                                   "text":  "Selamat malam",
+                                   "file":  "label_42.wav"
+                               }
+              }
+}

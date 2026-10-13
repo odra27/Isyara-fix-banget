@@ -1,0 +1,45 @@
+# Backend — Modeling contract, sign decision, phrase lookup.
+#
+# Runtime: CPython 3.12 (approved). The Modeling library pins numpy==2.2.6 and
+# onnxruntime==1.23.2 (ml/requirements.txt), which have no CPython 3.14 wheels.
+#
+# Modeling is integrated as a library from the SAME repository checkout
+# (Modeling source + artifact from commit 00397cd, artifact 20260930-0122, ADR-045; directory ml/). Install from
+# the repository root, in one Python 3.12 environment:
+#   pip install -r ml/requirements.txt
+#   pip install -e ml            # editable: Predictor finds ml/artifacts via repo layout
+#   pip install -e "backend[test]"
+# Do not install Modeling via `pip install git+...` or from a separate checkout.
+#
+# Run the API from backend/ (DATABASE_URL required):  uvicorn app.main:app
+# Run tests from backend/:  python -m pytest
+# Optional PostgreSQL integration test: set BACKEND_TEST_DATABASE_URL to an
+# empty, disposable database (the test applies the Phase 1 migration inside a
+# transaction and rolls back).
+
+[project]
+name = "gas-joints-backend"
+version = "0.1.0"
+requires-python = "==3.12.*"
+# Pins verified together with ml/requirements.txt (00397cd; unchanged vs 35eb871) by the pip resolver
+# on CPython 3.12.14: no conflicts.
+dependencies = [
+  "pydantic==2.11.9",        # same pin as ml/requirements.txt
+  "psycopg[binary]==3.3.6",  # direct PostgreSQL access (approved), no ORM
+  "fastapi==0.141.1",        # requires starlette>=0.46.0, pydantic>=2.9.0, Python>=3.10
+  "starlette==1.7.0",        # requires anyio>=4,<5, Python>=3.10
+  "uvicorn==0.54.0",         # ASGI server; requires click>=7, h11>=0.8, Python>=3.10
+  "PyJWT[crypto]==2.15.1",   # ADR-039 D3: ES256 JWT + PyJWKClient (stdlib urllib)
+  "cryptography==50.0.1",    # ADR-039 D3: EC P-256 backend for PyJWT; pulls cffi (unpinned)
+  "httpx==0.28.1",           # ADR-046: Supabase Storage REST client (was test-only); also TestClient transport
+  "python-multipart==0.0.32",  # ADR-046: multipart parser required by FastAPI/Starlette form uploads
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest==8.4.2",  # same pin as ml/requirements.txt
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

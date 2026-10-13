@@ -1,0 +1,71 @@
+# ---- Python ----
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+# ---- Data / training outputs (large, regenerable) ----
+# ml/data and ml/runs are also ignored in ml/.gitignore
+ml/data/
+ml/runs/
+*.pkl
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.log
+wl-bisindo*/
+*.zip
+*.mp4
+*.avi
+*.mov
+# Own live recordings (live_demo.py --record) land in ml/data/landmarks + ml/data/manifest_own.csv and
+# live test logs in ml/runs/live/*.jsonl -> both covered by ml/data/ and ml/runs/ above. Keep them out of
+# git: they are personal (body/hand landmarks of real people).
+*.jsonl
+# Skeleton previews (export_skeleton.py --preview) are debug images, regenerable.
+ml/exports/**/*_preview.png
+# NOTE: ml/artifacts/ (model.onnx, label_map.json, audio/*.wav, ...), ml/mp_models/*.task and
+# ml/exports/skeleton/label_XX.json (sign-guide animation for the kiosk) are intentionally tracked:
+# the backend Predictor and kiosk need them at runtime.
+# ---- Test / temp output ----
+test-results/
+playwright-report/
+htmlcov/
+.coverage
+*.tmp
+# ---- Node / kiosk frontend ----
+node_modules/
+.next/
+dist/
+build/
+out/
+coverage/
+.turbo/
+.vercel/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# ---- Secrets / env ----
+.env
+.env.*
+!.env.example
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# ---- Kiro / catatan lokal ----
+.kiro/
+.AGENTS.md
+.decisions.md
+.REKOMENDASI_BACKEND_DAN_DATABASE.md

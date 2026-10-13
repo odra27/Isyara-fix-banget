@@ -1,0 +1,431 @@
+{
+  "0": {
+    "phraseId": "label_00",
+    "text": "Air",
+    "english": "Water",
+    "aliases": [
+      "air minum",
+      "minum air"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "1": {
+    "phraseId": "label_01",
+    "text": "Belajar",
+    "english": "Learn",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "2": {
+    "phraseId": "label_02",
+    "text": "Cari",
+    "english": "Search",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "3": {
+    "phraseId": "label_03",
+    "text": "Hari",
+    "english": "Day",
+    "aliases": [
+      "hari ini",
+      "berapa hari"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "4": {
+    "phraseId": "label_04",
+    "text": "Ingat",
+    "english": "Remember",
+    "aliases": [
+      "jangan lupa",
+      "ingat ya"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "5": {
+    "phraseId": "label_05",
+    "text": "Lagi",
+    "english": "Again",
+    "aliases": [
+      "ulangi",
+      "sekali lagi",
+      "tolong ulangi"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "6": {
+    "phraseId": "label_06",
+    "text": "Maaf",
+    "english": "Sorry",
+    "aliases": [
+      "mohon maaf",
+      "permisi"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "7": {
+    "phraseId": "label_07",
+    "text": "Makan",
+    "english": "Eat",
+    "aliases": [
+      "makan dulu",
+      "sesudah makan",
+      "sebelum makan"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "8": {
+    "phraseId": "label_08",
+    "text": "Motor",
+    "english": "Motorcycle",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "9": {
+    "phraseId": "label_09",
+    "text": "Saya",
+    "english": "I",
+    "aliases": [
+      "aku"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "10": {
+    "phraseId": "label_10",
+    "text": "Terima kasih",
+    "english": "Thank you",
+    "aliases": [
+      "terimakasih",
+      "makasih",
+      "trima kasih"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "11": {
+    "phraseId": "label_11",
+    "text": "Tuli",
+    "english": "Deaf",
+    "aliases": [
+      "tunarungu",
+      "orang tuli"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "12": {
+    "phraseId": "label_12",
+    "text": "Apa",
+    "english": "What",
+    "aliases": [
+      "apa itu",
+      "ada apa"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "13": {
+    "phraseId": "label_13",
+    "text": "Siapa",
+    "english": "Who",
+    "aliases": [
+      "siapa namanya",
+      "dengan siapa"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "14": {
+    "phraseId": "label_14",
+    "text": "Kapan",
+    "english": "When",
+    "aliases": [
+      "kapan datang",
+      "jam berapa",
+      "tanggal berapa"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "15": {
+    "phraseId": "label_15",
+    "text": "Di mana",
+    "english": "Where",
+    "aliases": [
+      "dimana",
+      "di mana tempatnya",
+      "ke mana"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "16": {
+    "phraseId": "label_16",
+    "text": "Mengapa",
+    "english": "Why",
+    "aliases": [
+      "kenapa",
+      "mengapa begitu"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "17": {
+    "phraseId": "label_17",
+    "text": "Bagaimana",
+    "english": "How",
+    "aliases": [
+      "bagaimana caranya",
+      "gimana",
+      "caranya bagaimana"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "18": {
+    "phraseId": "label_18",
+    "text": "Merah",
+    "english": "Red",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "19": {
+    "phraseId": "label_19",
+    "text": "Kuning",
+    "english": "Yellow",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "20": {
+    "phraseId": "label_20",
+    "text": "Hijau",
+    "english": "Green",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "21": {
+    "phraseId": "label_21",
+    "text": "Hitam",
+    "english": "Black",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "22": {
+    "phraseId": "label_22",
+    "text": "Dengar",
+    "english": "Hear",
+    "aliases": [
+      "mendengar"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "23": {
+    "phraseId": "label_23",
+    "text": "Berangkat",
+    "english": "Depart",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "24": {
+    "phraseId": "label_24",
+    "text": "Datang",
+    "english": "Come",
+    "aliases": [
+      "datang lagi",
+      "kembali",
+      "kontrol"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "25": {
+    "phraseId": "label_25",
+    "text": "Teman",
+    "english": "Friend",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "26": {
+    "phraseId": "label_26",
+    "text": "Keluarga",
+    "english": "Family",
+    "aliases": [
+      "anggota keluarga",
+      "keluarganya"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "27": {
+    "phraseId": "label_27",
+    "text": "Rumah",
+    "english": "House",
+    "aliases": [],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "28": {
+    "phraseId": "label_28",
+    "text": "Pagi",
+    "english": "Morning",
+    "aliases": [
+      "pagi hari"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "29": {
+    "phraseId": "label_29",
+    "text": "Siang",
+    "english": "Noon",
+    "aliases": [
+      "siang hari"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "30": {
+    "phraseId": "label_30",
+    "text": "Sore",
+    "english": "Afternoon",
+    "aliases": [
+      "sore hari"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "31": {
+    "phraseId": "label_31",
+    "text": "Malam",
+    "english": "Night",
+    "aliases": [
+      "malam hari"
+    ],
+    "verified": true,
+    "source": "WL-BISINDO label list (user-provided)"
+  },
+  "32": {
+    "phraseId": "label_32",
+    "text": "Apa kabar",
+    "english": "How are you",
+    "aliases": [
+      "apa kabarnya",
+      "gimana kabarnya"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "33": {
+    "phraseId": "label_33",
+    "text": "Baik",
+    "english": "Good",
+    "aliases": [
+      "kabar baik",
+      "baik-baik saja"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "34": {
+    "phraseId": "label_34",
+    "text": "Berapa",
+    "english": "How much / how many",
+    "aliases": [
+      "berapa banyak",
+      "berapa harganya"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "35": {
+    "phraseId": "label_35",
+    "text": "Bingung",
+    "english": "Confused",
+    "aliases": [
+      "tidak mengerti",
+      "kurang paham"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "36": {
+    "phraseId": "label_36",
+    "text": "Halo",
+    "english": "Hello",
+    "aliases": [
+      "hai"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "37": {
+    "phraseId": "label_37",
+    "text": "Kamu",
+    "english": "You",
+    "aliases": [
+      "anda"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "38": {
+    "phraseId": "label_38",
+    "text": "Tidur",
+    "english": "Sleep",
+    "aliases": [
+      "istirahat"
+    ],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "39": {
+    "phraseId": "label_39",
+    "text": "Selamat siang",
+    "english": "Good afternoon",
+    "aliases": [],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "40": {
+    "phraseId": "label_40",
+    "text": "Selamat sore",
+    "english": "Good evening",
+    "aliases": [],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "41": {
+    "phraseId": "label_41",
+    "text": "Selamat pagi",
+    "english": "Good morning",
+    "aliases": [],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  },
+  "42": {
+    "phraseId": "label_42",
+    "text": "Selamat malam",
+    "english": "Good night",
+    "aliases": [],
+    "verified": true,
+    "source": "Own recordings + BISINDO 40-word archive (user-provided)"
+  }
+}

@@ -1,0 +1,32 @@
+[
+ {
+  "clip": "signer0_label10_sample1",
+  "text": "Terima kasih",
+  "file": "signer0_label10_sample1.json"
+ },
+ {
+  "clip": "signer2_label10_sample3",
+  "text": "Terima kasih",
+  "file": "signer2_label10_sample3.json"
+ },
+ {
+  "clip": "signer4_label10_sample5",
+  "text": "Terima kasih",
+  "file": "signer4_label10_sample5.json"
+ },
+ {
+  "clip": "signer1_label9_sample2",
+  "text": "Saya",
+  "file": "signer1_label9_sample2.json"
+ },
+ {
+  "clip": "signer3_label6_sample1",
+  "text": "Maaf",
+  "file": "signer3_label6_sample1.json"
+ },
+ {
+  "clip": "signer2_label5_sample2",
+  "text": "Lagi",
+  "file": "signer2_label5_sample2.json"
+ }
+]

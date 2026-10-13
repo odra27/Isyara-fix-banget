@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* Palet diturunkan dari referensi (ungu + aksen hijau/merah).
+   muted digelapkan sedikit dari #8B87B8 agar teks kecil lolos kontras WCAG AA. */
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-brand-50: #eeedfe;
+  --color-brand-100: #cecbf6;
+  --color-brand-200: #afa9ec;
+  --color-brand-400: #7f77dd;
+  --color-brand-600: #534ab7;
+  --color-brand-800: #3c3489;
+  --color-brand-900: #26215c;
+  --color-brand-950: #1a1640;
+
+  --color-tint: #f5f4fc;
+  --color-line: #e5e3f5;
+  --color-muted: #6e6a9e;
+  --color-ok: #2e9e5b;
+  --color-ok-ink: #1f7a45;
+  --color-rec: #d64545;
+
+  --shadow-phone: 0 30px 80px rgba(38, 33, 92, 0.16), 0 6px 18px rgba(38, 33, 92, 0.08);
+  --shadow-soft: 0 12px 30px rgba(38, 33, 92, 0.1);
+}
+
+@utility wrap {
+  width: min(1160px, calc(100% - 36px));
+  margin-inline: auto;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-white font-sans text-brand-900 antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-brand-400);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

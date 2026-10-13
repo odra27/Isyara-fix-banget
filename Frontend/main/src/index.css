@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* Palet sama dengan landing page. Ukuran teks memakai rem agar tombol "Aa" (perbesar teks) bekerja. */
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-brand-50: #eeedfe;
+  --color-brand-100: #cecbf6;
+  --color-brand-200: #afa9ec;
+  --color-brand-400: #7f77dd;
+  --color-brand-600: #534ab7;
+  --color-brand-800: #3c3489;
+  --color-brand-900: #26215c;
+  --color-brand-950: #1a1640;
+
+  --color-tint: #f5f4fc;
+  --color-line: #e5e3f5;
+  --color-muted: #6e6a9e;
+  --color-ok: #2e9e5b;
+  --color-ok-ink: #1f7a45;
+  --color-ok-soft: #eaf7ef;
+  --color-rec: #d64545;
+  --color-rec-soft: #fdeeee;
+
+  --shadow-soft: 0 12px 30px rgba(38, 33, 92, 0.1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-tint font-sans text-brand-900 antialiased;
+  }
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-brand-400);
+    outline-offset: 2px;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Pulse "Merekam": siklus 1.6 dtk, jauh di bawah 3 kedip/detik (aman fotosensitif). */
+@keyframes rec-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@utility anim-rec {
+  animation: rec-pulse 1.6s ease-in-out infinite;
+}
+@utility anim-breathe {
+  animation: breathe 3.2s ease-in-out infinite;
+}
+@utility anim-spin {
+  animation: spin-slow 0.9s linear infinite;
+}
+@utility anim-bar {
+  animation: bar 0.9s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Reduced motion: gerak diganti statis, indikator status tetap ada (warna + teks). */
+@media (prefers-reduced-motion: reduce) {
+  .anim-rec,
+  .anim-breathe,
+  .anim-bar {
+    animation: none;
+  }
+  .anim-spin {
+    animation-duration: 2.4s;
+  }
+}
