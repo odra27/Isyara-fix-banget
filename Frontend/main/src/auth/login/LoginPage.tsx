@@ -7,7 +7,7 @@ import { Logo } from '@/components/ui/logo';
 import { SignerAvatar } from '@/components/ui/signer-avatar';
 import { APP } from '@/config/app.config';
 import { AUTH } from '../auth.config';
-import { demoCredentials, isMockAuth, validateCredentialLengths } from '../auth.service';
+import { readyAccounts, validateCredentialLengths } from '../auth.service';
 import { useAuth } from '../AuthContext';
 import { Field } from '../components/Field';
 import { ForgotPasswordDialog } from './ForgotPasswordDialog';
@@ -16,6 +16,8 @@ import { ForgotPasswordDialog } from './ForgotPasswordDialog';
  * Halaman masuk siswa (ADR-051 D2). Akun dibuat sekolah; siswa masuk dengan NIS + password.
  * Kiri: branding + ilustrasi tablet belajar. Kanan: form. Di layar sempit menumpuk vertikal.
  */
+const hintAccounts = readyAccounts;
+
 export function LoginPage() {
   const { login, isAuthenticated, loading, endedReason, clearEndedReason } = useAuth();
   const navigate = useNavigate();
@@ -234,12 +236,14 @@ export function LoginPage() {
             </button>
           </form>
 
-          {isMockAuth && (
+          {hintAccounts.length > 0 && (
             <div className="mt-7 rounded-2xl border border-dashed border-brand-200 bg-white/70 p-4">
-              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600">Akun demo</p>
-              <p className="mt-1 text-xs text-muted">Backend belum tersambung. Ketuk salah satu akun untuk mengisi form.</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600">Akun siap pakai</p>
+              <p className="mt-1 text-xs text-muted">
+                Ketuk akun untuk mengisi form.
+              </p>
               <ul className="mt-2.5 flex flex-col gap-1.5">
-                {demoCredentials.map((c) => (
+                {hintAccounts.map((c) => (
                   <li key={c.nis}>
                     <button
                       type="button"

@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { authService, isMockAuth } from './auth.service';
+import { authService } from './auth.service';
 import { sessionStore } from './session.store';
 import { onSessionChange, refreshSession } from './token';
 import type { LoginResult, SiswaProfile, SiswaSession, SessionEndedReason } from './types';
 
 /**
- * Sesi siswa untuk seluruh aplikasi (Beranda, Materi, Chatbot, Kiosk, Pengaturan).
+ * Sesi siswa untuk seluruh aplikasi (Tanya ISYARA, Video Pelajaran, Materi Saya, Profil).
  * Catatan keamanan: ini gerbang UI. Proteksi data nyata ada di BE (require_student).
  */
 type Ctx = {
@@ -36,15 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let alive = true;
     const { session: restored, expired } = sessionStore.restore();
     if (expired) setEndedReason('expired');
-    // Mode API tapi sesi tersimpan tidak punya token (sisa mode demo / versi lama): bukan sesi BE yang
-    // sah, jadi dibuang dan form login ditampilkan.
-    if (restored && !isMockAuth && !restored.refreshToken) {
+    // Sesi tersimpan tanpa token (versi lama): bukan sesi BE yang sah, jadi dibuang.
+    if (restored && !restored.refreshToken) {
       sessionStore.clear();
       setSession(null);
       setLoading(false);
       return;
     }
-    if (!restored || isMockAuth) {
+    if (!restored) {
       setSession(restored);
       setLoading(false);
       return;

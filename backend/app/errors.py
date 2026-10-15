@@ -20,6 +20,9 @@ Each error carries a stable `code` and the approved HTTP status:
     CHAT_SESSION_NOT_FOUND 404  (/api/chat/*, ADR-051; also for another student's session)
     CHAT_MODEL_UNAVAILABLE 503  (chatbot model / OpenRouter failure, ADR-051)
     CHAT_MODEL_TIMEOUT    504   (chatbot model did not answer in time, ADR-051)
+    DOCUMENT_INVALID      422   (chat PDF upload: not a readable, unencrypted PDF, ADR-053)
+    DOCUMENT_NO_TEXT      422   (chat PDF upload: no text layer, e.g. a scan, ADR-053)
+    DOCUMENT_TOO_LARGE    413   (chat PDF upload: over the byte or page limit, ADR-053)
 
 Messages must never contain patient input (landmarks, audio, video) — ADR-012.
 """
@@ -29,7 +32,8 @@ from __future__ import annotations
 class BackendError(Exception):
     code: str = "INTERNAL_ERROR"
     http_status: int = 500
-    headers: dict[str, str] | None = None  # extra response headers (ADR-039 D6: 401)
+    # extra response headers (ADR-039 D6: 401)
+    headers: dict[str, str] | None = None
 
     def __init__(self, message: str) -> None:
         super().__init__(message)
@@ -154,3 +158,24 @@ class ChatModelTimeout(BackendError):
 
     code = "CHAT_MODEL_TIMEOUT"
     http_status = 504
+
+
+class DocumentInvalid(BackendError):
+    """Uploaded chat document is not a readable, unencrypted PDF (ADR-053)."""
+
+    code = "DOCUMENT_INVALID"
+    http_status = 422
+
+
+class DocumentNoText(BackendError):
+    """PDF has no extractable text layer, e.g. a scanned page (ADR-053)."""
+
+    code = "DOCUMENT_NO_TEXT"
+    http_status = 422
+
+
+class DocumentTooLarge(BackendError):
+    """PDF exceeds the byte or page limit (ADR-053)."""
+
+    code = "DOCUMENT_TOO_LARGE"
+    http_status = 413

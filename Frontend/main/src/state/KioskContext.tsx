@@ -5,11 +5,11 @@ import type { ConversationItem, FallbackReason, TabId } from '@/types/kiosk';
 import { uid } from '@/lib/utils';
 
 /**
- * Orkestrasi mode Kiosk kelas (PRD-FE §7). Kedua alur berjalan independen, dengan aturan arbitrase:
+ * Orkestrasi mode Kiosk kelas (SYSTEM_DESIGN.md §3.6). Kedua alur berjalan independen, dengan aturan arbitrase:
  *  1. TTS berbunyi  → STT (Bicara) nonaktif sampai TTS selesai + ttsCooldownMs.   [ttsSpeaking]
  *  2. Siswa RECORDING → tombol Bicara guru nonaktif dengan alasan tertulis.      [signRecording]
  *  3. B_LISTENING / animasi isyarat diputar → auto-capture kamera di-pause.       [speechActive]
- * Fallback per sisi (PRD-FE §8): sisi yang gagal beralih ke input manual, sisi lain tetap normal.
+ * Fallback per sisi (SYSTEM_DESIGN.md §9.5): sisi yang gagal beralih ke input manual, sisi lain tetap normal.
  * Eskalasi JBI dihapus (ADR-051): hasil yang tidak dikenali cukup diulang atau diketik.
  */
 type State = {

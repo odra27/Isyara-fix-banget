@@ -23,6 +23,7 @@ MIGRATIONS = Path(__file__).resolve().parents[2] / "Database" / "migrations"
 CHECKS: dict[str, str] = {
     "20261006000000_adr049_seed_43_label_vocabulary.sql": "select exists (select 1 from phrases where model_phrase_id = 'label_42')",
     "20261013000000_adr051_student_chat_schema.sql": "select to_regclass('chat_messages') is not null",
+    "20261014000000_adr053_chat_video_context_documents.sql": "select to_regclass('chat_documents') is not null",
 }
 
 

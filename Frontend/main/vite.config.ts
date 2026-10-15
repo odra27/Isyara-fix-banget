@@ -6,7 +6,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 
 // Landing page jalan di 5173, kiosk di 5174 (lihat VITE_KIOSK_URL / VITE_LANDING_URL di .env).
 //
-// HTTPS untuk uji di HP/tablet (PRD-FE §9): kamera & mic hanya diizinkan browser pada
+// HTTPS untuk uji di HP/tablet (ARCHITECTURE.md §7): kamera & mic hanya diizinkan browser pada
 // secure context (https / localhost). Di laptop, http://localhost sudah secure context,
 // jadi HTTPS dimatikan secara default agar dev harian tidak kena peringatan sertifikat.
 // Untuk uji lewat IP LAN di perangkat lain, jalankan `npm run dev:https` (set VITE_HTTPS=1)

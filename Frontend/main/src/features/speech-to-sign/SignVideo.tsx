@@ -10,7 +10,7 @@ import type { TextSegment } from '@/types/kiosk';
 import { KaraokeText, SignAvatar } from './SpeechAnimations';
 
 /**
- * Pemutar isyarat untuk siswa (PRD-FE §5). Teks SELALU tampil berdampingan.
+ * Pemutar isyarat untuk siswa (SYSTEM_DESIGN.md §3.6). Teks SELALU tampil berdampingan.
  * Urutan sumber: 1) video asli (videoUrl, hanya untuk satu kata)
  *                2) animasi kerangka: kata kosakata = rekaman asli, kata lain = gerakan buatan (ADR-051 D5)
  *                3) placeholder avatar (hanya bila tidak ada kata sama sekali)

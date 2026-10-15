@@ -1,4 +1,4 @@
-/** Tipe bersama untuk seluruh fitur kiosk. Bentuk data mengikuti kontrak API di PRD-FE §3. */
+/** Tipe bersama untuk seluruh fitur kiosk. Bentuk data mengikuti kontrak API di SYSTEM_DESIGN.md §4. */
 
 export type Landmark = [x: number, y: number, z: number];
 
@@ -72,5 +72,5 @@ export type ConversationItem = {
 
 export type TabId = 'siswa' | 'guru' | 'percakapan';
 
-/** Alasan sebuah sisi beralih ke mode ketik/pilih manual (PRD-FE §8). */
+/** Alasan sebuah sisi beralih ke mode ketik/pilih manual (SYSTEM_DESIGN.md §9.5). */
 export type FallbackReason = 'camera' | 'mic' | 'backend';

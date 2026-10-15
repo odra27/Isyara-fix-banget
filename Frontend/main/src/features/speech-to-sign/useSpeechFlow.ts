@@ -8,7 +8,7 @@ import { useKiosk } from '@/state/KioskContext';
 import type { MatchResult } from '@/types/kiosk';
 
 /**
- * Alur B: suara/teks guru → animasi isyarat (PRD-FE §5 & §6).
+ * Alur B: suara/teks guru → animasi isyarat (SYSTEM_DESIGN.md §3.6 & §9.5).
  * B_IDLE → B_LISTENING → B_MATCHING → B_PLAYING_SIGN → B_IDLE
  *                                   ↘ B_CONFIRM (ke guru)   ↘ B_NO_MATCH
  */
@@ -60,7 +60,7 @@ export function useSpeechFlow() {
     onUnavailable: () => k.setSpeechFallback('mic'),
   });
 
-  // Alasan tombol Bicara nonaktif harus tertulis (PRD-FE §7.2).
+  // Alasan tombol Bicara nonaktif harus tertulis (SYSTEM_DESIGN.md §3.6).
   const talkBlockedReason = k.signRecording
     ? 'Siswa sedang mengisyaratkan. Tunggu sampai selesai.'
     : k.ttsSpeaking

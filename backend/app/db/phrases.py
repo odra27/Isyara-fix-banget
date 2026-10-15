@@ -20,7 +20,7 @@ _FIND_BY_MODEL_PHRASE_ID = (
 )
 # /api/logs FK check (ADR-038 §3): existence only, no active/sign_recognizable filter.
 _EXISTS_BY_ID = "select 1 from phrases where id = %s"
-# GET /api/phrases (PRD-BE §4.4): active = true only; sign_recognizable is independent
+# GET /api/phrases (SYSTEM_DESIGN.md §4.2): active = true only; sign_recognizable is independent
 # (ADR-009) and not filtered. NULL active is excluded. No ordering is specified.
 _LIST_ACTIVE = "select id, phrase_text, category from phrases where active = true"
 

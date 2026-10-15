@@ -35,6 +35,7 @@ def ok(content):
 
 def test_env_without_key_is_offline(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEYS", raising=False)
     m = chat_model_from_env()
     assert isinstance(m, OfflineChatModel) and m.name == "offline"
     assert "belum tersambung" in run(m.reply([ChatTurn("user", "Halo")]))
@@ -47,7 +48,8 @@ def test_env_with_key(monkeypatch):
     m = chat_model_from_env()
     assert isinstance(m, OpenRouterChatModel) and KEY not in repr(m)
     cfg = OpenRouterConfig.from_env()
-    assert cfg.model == "google/gemini-2.0-flash-001" and cfg.timeout_s == 25.0 and KEY not in repr(cfg)
+    assert cfg.model == "google/gemini-2.0-flash-001" and cfg.timeout_s == 25.0 and KEY not in repr(
+        cfg)
 
 
 def test_request_shape_and_reply():
@@ -66,7 +68,8 @@ def test_request_shape_and_reply():
     body = json.loads(req.content)
     assert body["model"] == "x/y"
     assert body["messages"][0] == {"role": "system", "content": SYSTEM_PROMPT}
-    assert body["messages"][1] == {"role": "user", "content": "Jelaskan siklus air"}
+    assert body["messages"][1] == {
+        "role": "user", "content": "Jelaskan siklus air"}
 
 
 @pytest.mark.parametrize("resp", [
@@ -96,5 +99,125 @@ def test_network_error_and_timeout():
         run(model_with(slow).reply([ChatTurn("user", "Halo")]))
 
 
+def test_context_is_a_second_system_message():
+    seen = []
+
+    def handler(req):
+        seen.append(json.loads(req.content))
+        return ok("Jawaban")
+
+    run(model_with(handler).reply(
+        [ChatTurn("user", "Maksudnya?")], context="Isi video: awan."))
+    msgs = seen[0]["messages"]
+    assert msgs[0] == {"role": "system", "content": SYSTEM_PROMPT}
+    assert msgs[1] == {"role": "system", "content": "Isi video: awan."}
+    assert msgs[2] == {"role": "user", "content": "Maksudnya?"}
+
+
 def test_clean_reply_caps_length():
     assert len(clean_reply("kata " * 1000)) <= 2001
+
+
+# ---------------------------------------------------------------- ADR-053: backup keys
+
+KEY2 = "sk-or-TESTONLY-backup-2"
+KEY3 = "sk-or-TESTONLY-backup-3"
+
+
+def test_env_backup_keys_parsed_and_deduplicated(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", KEY)
+    monkeypatch.setenv("OPENROUTER_API_KEYS", f" {KEY2}, ,{KEY}, {KEY3} ")
+    cfg = OpenRouterConfig.from_env()
+    assert cfg.keys == (KEY, KEY2, KEY3)
+    assert KEY2 not in repr(cfg) and KEY3 not in repr(cfg)
+
+
+def test_env_only_backup_keys(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setenv("OPENROUTER_API_KEYS", f"{KEY2},{KEY3}")
+    assert OpenRouterConfig.from_env().keys == (KEY2, KEY3)
+
+
+@pytest.mark.parametrize("status", [401, 402, 403, 429])
+def test_rate_limited_key_falls_back_to_next(status):
+    used = []
+
+    def handler(req):
+        used.append(req.headers["authorization"])
+        return httpx.Response(status) if len(used) == 1 else ok("Jawaban cadangan")
+
+    m = OpenRouterChatModel(OpenRouterConfig(api_key=KEY, extra_keys=(
+        KEY2,)), transport=httpx.MockTransport(handler))
+    assert run(m.reply([ChatTurn("user", "Halo")])) == "Jawaban cadangan"
+    assert used == [f"Bearer {KEY}", f"Bearer {KEY2}"]
+
+
+def test_server_error_does_not_burn_backup_keys():
+    used = []
+
+    def handler(req):
+        used.append(1)
+        return httpx.Response(500)
+
+    m = OpenRouterChatModel(OpenRouterConfig(api_key=KEY, extra_keys=(
+        KEY2,)), transport=httpx.MockTransport(handler))
+    with pytest.raises(ChatModelUnavailable):
+        run(m.reply([ChatTurn("user", "Halo")]))
+    assert used == [1]
+
+
+def test_all_keys_limited_is_unavailable():
+    m = OpenRouterChatModel(OpenRouterConfig(api_key=KEY, extra_keys=(KEY2, KEY3)),
+                            transport=httpx.MockTransport(lambda req: httpx.Response(429)))
+    with pytest.raises(ChatModelUnavailable) as e:
+        run(m.reply([ChatTurn("user", "Halo")]))
+    assert all(k not in str(e.value) for k in (KEY, KEY2, KEY3))
+
+
+# ---------------------------------------------------------------- backup models
+
+def test_env_fallback_models(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", KEY)
+    monkeypatch.setenv("OPENROUTER_MODEL", "a/main:free")
+    monkeypatch.setenv("OPENROUTER_FALLBACK_MODELS",
+                       " b/backup:free , a/main:free,")
+    assert OpenRouterConfig.from_env().models == ("a/main:free", "b/backup:free")
+
+
+def test_fallback_model_after_all_keys_limited():
+    seen = []
+
+    def handler(req):
+        body = json.loads(req.content)
+        seen.append((body["model"], req.headers["authorization"]))
+        return ok("Jawaban model cadangan") if body["model"] == "b/backup" else httpx.Response(429)
+
+    m = OpenRouterChatModel(OpenRouterConfig(api_key=KEY, extra_keys=(KEY2,), model="a/main", extra_models=("b/backup",)),
+                            transport=httpx.MockTransport(handler))
+    assert run(m.reply([ChatTurn("user", "Halo")])) == "Jawaban model cadangan"
+    assert seen == [
+        ("a/main", f"Bearer {KEY}"), ("a/main", f"Bearer {KEY2}"), ("b/backup", f"Bearer {KEY}")]
+
+
+@pytest.mark.parametrize("bad", [httpx.Response(500), httpx.Response(404), ok("   ")])
+def test_fallback_model_on_unusable_answer(bad):
+    def handler(req):
+        return ok("Cadangan") if json.loads(req.content)["model"] == "b/backup" else bad
+
+    m = OpenRouterChatModel(OpenRouterConfig(api_key=KEY, model="a/main", extra_models=("b/backup",)),
+                            transport=httpx.MockTransport(handler))
+    assert run(m.reply([ChatTurn("user", "Halo")])) == "Cadangan"
+
+
+def test_timeout_does_not_try_fallback_model():
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        raise httpx.ReadTimeout("slow")
+
+    m = OpenRouterChatModel(OpenRouterConfig(api_key=KEY, model="a/main", extra_models=("b/backup",)),
+                            transport=httpx.MockTransport(handler))
+    with pytest.raises(ChatModelTimeout):
+        run(m.reply([ChatTurn("user", "Halo")]))
+    assert calls == [1]

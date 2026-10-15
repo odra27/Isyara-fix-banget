@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { gsap, useGSAP, MOTION_OK } from '../../lib/gsap';
 import { EASE } from '../../animations/tokens';
 
-// Contoh dari 43 kosakata BISINDO yang dilatih pada model, dikelompokkan untuk konteks belajar.
+// Contoh kosakata BISINDO yang dilatih pada model, dikelompokkan untuk konteks belajar.
 const GROUPS = [
   { code: 'A', name: 'Sapaan', words: ['Halo', 'Apa kabar', 'Selamat pagi', 'Selamat siang', 'Terima kasih'] },
   { code: 'B', name: 'Pertanyaan', words: ['Apa', 'Bagaimana', 'Berapa', 'Kapan', 'Cari'] },
@@ -40,7 +40,7 @@ export function Vocabulary() {
             <span className="text-brand-200">kegiatan belajar.</span>
           </h2>
           <p className="max-w-[360px] text-[14px] leading-relaxed text-brand-100">
-            Model kami mengenali 43 kata BISINDO yang telah dilatih dan divalidasi. Lebih sedikit, tapi bisa
+            Model kami mengenali kosakata BISINDO yang telah dilatih dan divalidasi. Lebih sedikit, tapi bisa
             diandalkan.
           </p>
         </div>
@@ -72,7 +72,7 @@ export function Vocabulary() {
           </div>
         </div>
         <p className="mt-6 text-[12px] text-brand-200">
-          Contoh di atas sebagian dari 43 kata terlatih, satu dialek BISINDO.
+          Contoh di atas sebagian dari kosakata terlatih, satu dialek BISINDO.
         </p>
       </div>
     </section>

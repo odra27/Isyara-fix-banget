@@ -1,4 +1,4 @@
-"""GET /api/phrases (PRD-BE §4.4, AGENTS §23). Public, read-only, no auth.
+"""GET /api/phrases (SYSTEM_DESIGN.md §4.2, AGENTS §23). Public, read-only, no auth.
 
 Returns only phrases with active = true, exposing exactly the PRD fields:
 id (phrases.id UUID), phrase_text, category. No model_phrase_id, flags,

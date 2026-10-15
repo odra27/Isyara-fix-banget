@@ -3,13 +3,8 @@ import { AUTH } from './auth.config';
 import type { LoginResult, SiswaProfile } from './types';
 
 /**
- * Auth service siswa (ADR-051 D2). Akun dibuat sekolah; siswa masuk dengan NIS + password.
- *
- * PERINGATAN: mode dummy adalah GERBANG UI/UX, BUKAN proteksi keamanan. Kredensial di bawah
- * dapat dibaca siapa pun lewat devtools. Jangan isi DUMMY_ACCOUNTS dengan data siswa asli.
- *
- * - APP.authMode 'mock' → mockAuthService (DUMMY_ACCOUNTS).
- * - APP.authMode 'api'  → httpAuthService (POST /api/student/auth/login).
+ * Auth service siswa (ADR-051 D2). Akun dibuat sekolah; siswa masuk dengan NIS + password lewat
+ * Backend (POST /api/student/auth/login). Tidak ada mode demo (ADR-053).
  */
 export interface AuthService {
   login(nis: string, password: string): Promise<LoginResult>;
@@ -20,36 +15,14 @@ export interface AuthService {
   refresh(refreshToken: string): Promise<LoginResult | { ok: false; reason: 'invalid' }>;
 }
 
-// ---------------------------------------------------------------- Dummy (tanpa BE)
-
-type DummyAccount = { password: string; profile: SiswaProfile };
-
-/** Akun demo. Semua nilai fiktif. */
-export const DUMMY_ACCOUNTS: readonly DummyAccount[] = [
-  {
-    password: 'isyara123',
-    profile: { id: 'demo-siswa-1', nis: '0012345678', name: 'Nadia Putri', className: '5A', grade: 5, school: 'SLB Negeri Contoh' },
-  },
-  {
-    password: 'isyara456',
-    profile: { id: 'demo-siswa-2', nis: '0087654321', name: 'Raka Pratama', className: '7B', grade: 7, school: 'SLB Negeri Contoh' },
-  },
-];
-
-export const demoCredentials = DUMMY_ACCOUNTS.map((a) => ({ nis: a.profile.nis, password: a.password }));
-
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-export const mockAuthService: AuthService = {
-  async login(nis, password) {
-    await wait(450);
-    const found = DUMMY_ACCOUNTS.find((a) => a.profile.nis === nis && a.password === password);
-    return found ? { ok: true, profile: found.profile } : { ok: false, reason: 'invalid-credentials' };
-  },
-  async refresh() {
-    return { ok: false, reason: 'invalid' };
-  },
-};
+/**
+ * Akun siap pakai yang ditampilkan di bawah form login (akun asli di Supabase), diisi lewat
+ * Frontend/main/.env (VITE_DEMO_NIS + VITE_DEMO_PASSWORD). Kosong = kotak tidak tampil.
+ * Nilainya ikut ke bundle FE, jadi kosongkan untuk build publik.
+ */
+const demoNis = (import.meta.env.VITE_DEMO_NIS || '').trim();
+const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || '';
+export const readyAccounts = demoNis && demoPassword ? [{ nis: demoNis, password: demoPassword }] : [];
 
 // ---------------------------------------------------------------- HTTP
 
@@ -108,9 +81,7 @@ export const httpAuthService: AuthService = {
   },
 };
 
-export const authService: AuthService = APP.authMode === 'api' ? httpAuthService : mockAuthService;
-/** true = kredensial dummy dipakai, jadi kolom akun demo boleh ditampilkan di halaman login. */
-export const isMockAuth = APP.authMode !== 'api';
+export const authService: AuthService = httpAuthService;
 
 export function validateCredentialLengths(nis: string, password: string): string | null {
   if (nis.length > AUTH.maxNisLength) return `NIS maksimal ${AUTH.maxNisLength} karakter.`;

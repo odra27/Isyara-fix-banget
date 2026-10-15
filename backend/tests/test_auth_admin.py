@@ -500,6 +500,8 @@ def test_exact_production_route_surface():
         ("GET", "/api/admin/logs"),
         ("GET", "/api/admin/phrases"),
         ("GET", "/api/admin/staff"),
+        ("GET", "/api/chat/activity"),  # ADR-053
+        ("GET", "/api/chat/documents"),  # ADR-053
         ("GET", "/api/chat/sessions"),
         ("GET", "/api/chat/sessions/{session_id}/messages"),
         ("GET", "/api/devices/{device_id}/status"),
@@ -516,6 +518,7 @@ def test_exact_production_route_surface():
         ("POST", "/api/admin/staff"),
         ("POST", "/api/auth/login"),
         ("POST", "/api/chat/sessions"),
+        ("POST", "/api/chat/sessions/{session_id}/documents"),  # ADR-053
         ("POST", "/api/chat/sessions/{session_id}/messages"),
         ("POST", "/api/devices/{device_id}/heartbeat"),
         ("POST", "/api/kiosk/call-jbi"),

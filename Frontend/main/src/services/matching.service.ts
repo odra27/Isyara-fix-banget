@@ -6,9 +6,9 @@ import type { HandFrame, MatchResult } from '@/types/kiosk';
 import { logsService } from './logs.service';
 
 /**
- * Service matching. FE TIDAK memanggil model langsung, semua lewat BE (PRD-FE §3).
+ * Service matching. FE TIDAK memanggil model langsung, semua lewat BE (SYSTEM_DESIGN.md §2).
  * - VITE_API_BASE_URL kosong → mockMatchingService (bisa dikendalikan SimulatorPanel).
- * - VITE_API_BASE_URL terisi → httpMatchingService sesuai kontrak PRD-FE §3.1 & §3.2.
+ * - VITE_API_BASE_URL terisi → httpMatchingService sesuai kontrak SYSTEM_DESIGN.md §4.2.
  */
 export interface MatchingService {
   matchSign(sequence: HandFrame[], durationMs: number): Promise<MatchResult>;
@@ -192,5 +192,6 @@ export const mockMatchingService: MatchingService = {
   },
 };
 
-export const matchingService: MatchingService = APP.useBackend ? httpMatchingService : mockMatchingService;
-export const isMockBackend = !APP.useBackend;
+/** Selalu lewat Backend (ADR-053). mockMatchingService hanya untuk SimulatorPanel (?dev=1, kiosk). */
+export const matchingService: MatchingService = httpMatchingService;
+export const isMockBackend = false;

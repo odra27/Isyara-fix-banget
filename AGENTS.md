@@ -18,6 +18,13 @@ Jika terdapat konflik antara implementasi, instruksi task, dan dokumen project, 
 > (siswa ↔ guru). Eskalasi JBI dihapus dari Frontend. Bila bagian di bawah masih menyebut
 > Puskesmas / pasien / petugas / JBI, ADR-051 yang berlaku.
 
+> **ADR-053 (2026-10-14):** aplikasi siswa menjadi **chat-first**. Halaman utama Tanya ISYARA
+> (`/chat`); input isyarat ada di kolom chat ("Pakai isyarat"); pertanyaan bisa dikirim dari video
+> pelajaran (`video {id, section, t_sec}`, transkrip dipilih Backend); PDF materi berbasis teks bisa
+> diunggah per percakapan (hanya teks yang disimpan). Mode Kiosk kelas tersembunyi di `/kiosk`
+> (tidak ada di menu). Tidak ada mode demo/mock di aplikasi siswa. ADR-053 mengalahkan ADR-051
+> bila bertentangan. Lihat `PRD.md` §2 untuk perbandingan sebelum/sesudah.
+
 Project ini adalah platform belajar inklusif untuk siswa Tuli, dengan mode kiosk satu-device untuk komunikasi dua arah antara siswa dan guru di kelas.
 
 Dua alur utama:
@@ -61,9 +68,9 @@ Gunakan urutan prioritas berikut ketika menentukan requirement:
 
 1. Instruksi eksplisit user untuk task saat ini.
 2. `decisions.md` / ADR yang telah disetujui.
-3. PRD induk.
-4. PRD khusus domain/tim.
-5. Dokumentasi teknis.
+3. `PRD.md` (produk: apa dan mengapa).
+4. `SYSTEM_DESIGN.md` (perilaku: alur, kontrak API, error, skema data, prompt, privasi).
+5. `ARCHITECTURE.md` (struktur & runtime: stack, layout repo, env, cara menjalankan, deployment).
 6. Implementasi/code yang sudah ada.
 7. Asumsi agent.
 
@@ -595,12 +602,16 @@ Jangan membuat fallback nearest-match yang memaksa prediction ketika confidence 
 
 # 21. Scope Control
 
-MVP hanya mencakup (diperbarui ADR-051):
+MVP hanya mencakup (diperbarui ADR-051, ADR-052, ADR-053):
 
-* akun siswa (login NIS, dibuat sekolah),
-* materi pembelajaran dummy + Materi Saya,
+* akun siswa (login NIS, dibuat sekolah) dengan sesi persisten (refresh token, ADR-052),
+* aplikasi chat-first: Tanya ISYARA (`/chat`) sebagai halaman utama, input isyarat "Pakai isyarat" di kolom chat,
 * chatbot siswa + riwayat chat,
-* kiosk satu device (mode kelas siswa ↔ guru),
+* pertanyaan dari video pelajaran (`video {id, section, t_sec}`, transkrip dari katalog Backend) + Video Pelajaran dengan caption,
+* unggah PDF materi berbasis teks per percakapan (≤ 5 MB, ≤ 10 halaman, ≤ 5 per chat; tanpa OCR),
+* Materi Saya (PDF yang diunggah, video tersimpan/terakhir), Riwayat, Profil + Kegiatan belajarku,
+* kiosk satu device (mode kelas siswa ↔ guru), tersembunyi di `/kiosk` (tidak ada di menu),
+* tanpa mode demo/mock di aplikasi siswa (kotak "Akun siap pakai" dari env lokal boleh; simulator `?dev=1` hanya di kiosk),
 * domain edukasi,
 * 5–10 demo phrases,
 * sign → text/speech,
@@ -617,6 +628,7 @@ Di luar scope:
 * room code,
 * QR pairing,
 * akun guru (belum, ADR-051 open item 4),
+* OCR / model vision untuk PDF hasil scan atau foto (ADR-053 open item 2),
 * registrasi mandiri siswa,
 * general BISINDO translation,
 * generative 3D avatar,

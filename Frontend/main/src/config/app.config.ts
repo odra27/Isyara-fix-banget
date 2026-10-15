@@ -1,24 +1,19 @@
-/** Konfigurasi umum kiosk. Nilai dari .env bila ada. */
+/** Konfigurasi umum aplikasi siswa. Nilai dari .env bila ada. */
 export const APP = {
-  deviceId: import.meta.env.VITE_DEVICE_ID || 'kiosk-demo-1',
+  /** UUID device kiosk di tabel `devices` (BE memvalidasi sebagai UUID). Dipakai /api/match/sign. */
+  deviceId: import.meta.env.VITE_DEVICE_ID || '00000000-0000-4000-8000-00000000d001',
   /**
-   * VITE_API_BASE_URL kosong = pakai mock service.
-   * "/" = lewat proxy Vite (/api → backend :8000, lihat vite.config.ts). Disarankan: jalan juga di HP via https.
-   * URL penuh (mis. http://localhost:8000) = panggil backend langsung (butuh CORS).
+   * Aplikasi selalu memakai Backend (ADR-053: tidak ada mode demo). Kosong atau "/" = origin yang
+   * sama lewat proxy Vite (/api → backend :8000, lihat vite.config.ts). URL penuh = panggil backend
+   * langsung (butuh CORS). Bila backend mati, layar menampilkan "Tidak bisa terhubung ke server".
    */
-  useBackend: Boolean(import.meta.env.VITE_API_BASE_URL),
   apiBaseUrl: (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, ''),
-  /**
-   * Login siswa: 'api' = Supabase lewat BE, 'mock' = akun demo di browser.
-   * Default ikut useBackend. Set VITE_AUTH_MODE=mock saat BE jalan tanpa Supabase (LOCAL_DEV_DB=1).
-   */
-  authMode: (import.meta.env.VITE_AUTH_MODE || (import.meta.env.VITE_API_BASE_URL ? 'api' : 'mock')) as 'api' | 'mock',
   landingUrl: import.meta.env.VITE_LANDING_URL || '/',
-  /** Request ke BE dianggap gagal setelah ini → mode fallback (PRD-FE §3). */
+  /** Request ke BE dianggap gagal setelah ini → mode fallback (PRD §Reliability). */
   requestTimeoutMs: 4000,
   /** Lama RESULT_ACCEPT / RESULT_UNKNOWN tampil sebelum kembali ke IDLE. RESULT_CONFIRM menunggu aksi. */
   resultHoldMs: 7000,
-  /** Jeda setelah TTS selesai sebelum mic boleh aktif lagi (cegah feedback loop, PRD-FE §7). */
+  /** Jeda setelah TTS selesai sebelum mic boleh aktif lagi (cegah feedback loop). */
   ttsCooldownMs: 300,
   /** Durasi placeholder video isyarat saat video_url belum tersedia. */
   placeholderVideoMs: 3500,

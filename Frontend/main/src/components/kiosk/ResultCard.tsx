@@ -5,7 +5,7 @@ import type { MatchResult } from '@/types/kiosk';
 import { cn } from '@/lib/utils';
 
 /**
- * Tampilan hasil sesuai confidence (PRD-FE §6), dipakai kedua alur.
+ * Tampilan hasil sesuai confidence (SYSTEM_DESIGN.md §9.5), dipakai kedua alur.
  * accepted  → teks hasil (+ indikator dibacakan)
  * confirmed → "Kemungkinan maksud" + bar confidence + Konfirmasi / Coba lagi
  * <60%      → "Isyarat belum dikenali" + Coba lagi / Ketik saja (ADR-051: tanpa JBI)

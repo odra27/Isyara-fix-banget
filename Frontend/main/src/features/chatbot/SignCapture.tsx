@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Camera, Check, Hand, LoaderCircle, RotateCcw, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { VOCABULARY } from '@/data/vocabulary';
 import type { CaptureEvent } from '@/features/sign-to-text/autoCapture';
 import { useAutoCapture } from '@/features/sign-to-text/useAutoCapture';
 import { useHandTracking } from '@/features/sign-to-text/useHandTracking';
@@ -24,7 +23,6 @@ type Stage = { kind: 'capture' } | { kind: 'processing' } | { kind: 'confirm'; r
 export function SignCapture({ onWord, onClose }: { onWord: (text: string) => void; onClose: () => void }) {
   const [stage, setStage] = useState<Stage>({ kind: 'capture' });
   const [added, setAdded] = useState<string | null>(null);
-  const [showVocab, setShowVocab] = useState(false);
   const cam = useCamera({ onFailure: () => undefined });
   const captureOn = stage.kind === 'capture' && cam.status === 'ready';
   const tracking = useHandTracking(cam.videoRef, captureOn);
@@ -154,7 +152,7 @@ export function SignCapture({ onWord, onClose }: { onWord: (text: string) => voi
         <div className="flex min-w-0 flex-col">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-sm font-extrabold">Bertanya dengan isyarat</p>
+              <p className="text-sm font-extrabold">Tunjukkan isyarat ke kamera</p>
               <p className="mt-0.5 text-xs leading-relaxed text-muted">
                 Satu isyarat = satu kata. Kata yang dikenali masuk ke kolom pesan, lalu tekan Kirim.
               </p>
@@ -197,30 +195,6 @@ export function SignCapture({ onWord, onClose }: { onWord: (text: string) => voi
             </AnimatePresence>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowVocab((v) => !v)}
-            aria-expanded={showVocab}
-            className="mt-auto w-fit rounded-lg px-1 text-xs font-bold text-brand-600 underline-offset-4 hover:underline"
-          >
-            {showVocab ? 'Sembunyikan' : 'Lihat'} {VOCABULARY.length} kata yang bisa dikenali
-          </button>
-          <AnimatePresence>
-            {showVocab && (
-              <motion.ul
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-2 flex max-h-28 flex-wrap gap-1 overflow-y-auto"
-              >
-                {VOCABULARY.map((v) => (
-                  <li key={v.phraseId} className="rounded-full bg-tint px-2 py-0.5 text-[0.6875rem] font-semibold text-brand-800">
-                    {v.text}
-                  </li>
-                ))}
-              </motion.ul>
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </motion.section>

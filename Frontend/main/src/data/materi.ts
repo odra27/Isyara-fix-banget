@@ -1,9 +1,10 @@
 import type { SignerTone } from '@/components/ui/signer-avatar';
 
 /**
- * Materi pembelajaran DUMMY (ADR-051 D6). Belum ada CMS / upload materi: video asli diganti
- * avatar placeholder, dan tiap bagian diperagakan dengan animasi isyarat dari teks `caption`.
- * Ganti dengan data dari BE saat tabel materi tersedia.
+ * Video pelajaran (ADR-051 D6, ADR-053 D3). Belum ada CMS: tiap bagian diperagakan dengan animasi
+ * isyarat dari teks `caption`. Transkrip yang sama ada di backend/app/learning/catalog.py (dipakai
+ * sebagai konteks saat siswa bertanya dari video): id, urutan bagian dan teksnya harus sama.
+ * Nama guru sementara; ganti `teacher` / `teacherPhoto` dengan data tim.
  */
 export type Subject = 'Matematika' | 'Bahasa Indonesia' | 'IPA' | 'IPS' | 'Bahasa Inggris' | 'Lainnya';
 
@@ -23,6 +24,10 @@ export type Materi = {
   sections: MateriSection[];
   /** Pertanyaan pembuka untuk tombol "Tanya chatbot". */
   ask: string;
+  /** Guru pengampu yang tampil di kartu video. */
+  teacher: string;
+  /** Foto guru (opsional, mis. '/guru/rina.jpg' di public/). Kosong = inisial nama. */
+  teacherPhoto?: string;
 };
 
 export const SUBJECTS: readonly Subject[] = ['Matematika', 'Bahasa Indonesia', 'IPA', 'IPS', 'Bahasa Inggris', 'Lainnya'];
@@ -30,6 +35,7 @@ export const SUBJECTS: readonly Subject[] = ['Matematika', 'Bahasa Indonesia', '
 export const MATERI: Materi[] = [
   {
     id: 'siklus-air',
+    teacher: 'Bu Rina Wulandari',
     title: 'Siklus Air',
     subject: 'IPA',
     grade: 5,
@@ -47,6 +53,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'bangun-datar',
+    teacher: 'Pak Dimas Prasetyo',
     title: 'Bangun Datar',
     subject: 'Matematika',
     grade: 4,
@@ -64,6 +71,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'perkenalan-diri',
+    teacher: 'Bu Sari Lestari',
     title: 'Perkenalan Diri',
     subject: 'Bahasa Indonesia',
     grade: 1,
@@ -81,6 +89,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'tata-surya',
+    teacher: 'Pak Andi Kurniawan',
     title: 'Tata Surya',
     subject: 'IPA',
     grade: 6,
@@ -97,6 +106,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'simple-present',
+    teacher: 'Bu Maya Anggraini',
     title: 'Simple Present Tense',
     subject: 'Bahasa Inggris',
     grade: 7,
@@ -113,6 +123,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'alat-transportasi',
+    teacher: 'Pak Yoga Saputra',
     title: 'Alat Transportasi',
     subject: 'IPS',
     grade: 3,
@@ -129,6 +140,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'persentase',
+    teacher: 'Bu Fitri Handayani',
     title: 'Mengenal Persentase',
     subject: 'Matematika',
     grade: 6,
@@ -144,6 +156,7 @@ export const MATERI: Materi[] = [
   },
   {
     id: 'warna',
+    teacher: 'Pak Rizal Hakim',
     title: 'Mengenal Warna',
     subject: 'Lainnya',
     grade: 1,
@@ -164,3 +177,24 @@ export const MATERI: Materi[] = [
 export const materiById = (id: string | undefined) => MATERI.find((m) => m.id === id) ?? null;
 
 export const subjectLabel = (m: Materi) => `${m.subject} · Kelas ${m.grade}`;
+
+/** '06:24' → 384 detik. */
+export function durationSec(m: Materi): number {
+  const [min, sec] = m.duration.split(':').map(Number);
+  return (min || 0) * 60 + (sec || 0);
+}
+
+/** Panjang tiap bagian (detik): durasi video dibagi rata ke semua bagian. */
+export const sectionSec = (m: Materi) => durationSec(m) / m.sections.length;
+
+/** Detik awal bagian ke-i. */
+export const sectionStart = (m: Materi, i: number) => i * sectionSec(m);
+
+/** Bagian yang sedang diputar pada detik t. */
+export const sectionAt = (m: Materi, t: number) => Math.min(m.sections.length - 1, Math.max(0, Math.floor(t / sectionSec(m))));
+
+/** 135 → '02:15'. */
+export function clock(t: number): string {
+  const s = Math.max(0, Math.round(t));
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}

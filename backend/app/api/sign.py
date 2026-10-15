@@ -22,7 +22,7 @@ from app.matching.sign import decide_sign_result
 from app.modeling.client import ModelingClient
 from app.modeling.sequence import SignSequence
 
-MIN_DURATION_MS = 500  # PRD-BE §4.1, ADR-037
+MIN_DURATION_MS = 500  # SYSTEM_DESIGN.md §4.2, ADR-037
 
 router = APIRouter()
 
@@ -56,7 +56,8 @@ async def match_sign(body: MatchSignRequest, request: Request) -> MatchSignRespo
             raise ModelingUnavailable("Modeling is not available")
         n_frames = len(body.sequence.frames)
         if n_frames > modeling.max_frames:
-            raise PayloadTooLarge(f"sequence has {n_frames} frames (max {modeling.max_frames})")
+            raise PayloadTooLarge(
+                f"sequence has {n_frames} frames (max {modeling.max_frames})")
 
         result = await modeling.match_sign(body.sequence)
         decision = await decide_sign_result(result, db.phrases)

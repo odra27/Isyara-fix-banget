@@ -1,34 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Hand, Pause, Play, RotateCcw } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Captions, CaptionsOff, Hand, Pause, Play, RotateCcw } from 'lucide-react';
+import { SignCaption } from '@/components/ui/sign-caption';
 import { signWordsForText, SkeletonPlayer } from '@/features/skeleton-animation';
 import { useSettings } from '@/state/SettingsContext';
 import { cn } from '@/lib/utils';
 
 /**
  * Animasi isyarat untuk jawaban chatbot (ADR-051 D5). Kata kosakata memakai rekaman asli; kata
- * lain memakai gerakan buatan yang konsisten per kata dan dijamin berbeda dari 43 kata terlatih.
+ * lain memakai gerakan penanda yang konsisten per kata.
  *
  * Klip baru dibuat saat pertama diputar (bukan untuk semua pesan riwayat sekaligus), supaya
- * membuka riwayat panjang tetap ringan. Kata yang sedang diperagakan disorot di strip kata.
+ * membuka riwayat panjang tetap ringan. Teksnya tampil sebagai caption gaya YouTube (ADR-053).
  */
 export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean }) {
-  const { signSpeed } = useSettings();
+  const settings = useSettings();
   const [started, setStarted] = useState(autoPlay);
   const [playing, setPlaying] = useState(autoPlay);
   const [run, setRun] = useState(0);
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
-  const strip = useRef<HTMLOListElement>(null);
 
   const words = useMemo(() => (started ? signWordsForText(text) : []), [started, text]);
   const clips = useMemo(() => words.map((w) => w.clip), [words]);
-
-  // Strip kata ikut bergulir ke kata aktif.
-  useEffect(() => {
-    const el = strip.current?.children[active] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-  }, [active]);
+  const captionWords = useMemo(() => words.map((w) => w.text), [words]);
 
   const play = () => {
     setStarted(true);
@@ -45,12 +40,12 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
         onClick={play}
         className="group mt-3 flex w-full items-center gap-3 rounded-2xl border border-line bg-white p-2 pr-4 text-left transition-colors hover:border-brand-200 hover:bg-brand-50/50"
       >
-        <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand-900 text-brand-200 transition-transform group-hover:scale-105">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600 transition-transform group-hover:scale-105">
           <Hand className="size-5" aria-hidden="true" />
         </span>
         <span className="min-w-0">
-          <span className="block text-sm font-extrabold text-brand-900">Putar isyarat BISINDO</span>
-          <span className="block text-xs text-muted">Jawaban diperagakan kata demi kata</span>
+          <span className="block text-sm font-extrabold text-brand-900">Putar isyarat</span>
+          <span className="block text-xs text-muted">Jawaban diperagakan kata demi kata, dengan caption</span>
         </span>
         <Play className="ml-auto size-4 text-brand-600" aria-hidden="true" />
       </button>
@@ -58,17 +53,17 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
   }
 
   return (
-    <div className="mt-3 overflow-hidden rounded-2xl bg-brand-900 text-white">
-      <div className="relative aspect-[16/10] w-full bg-brand-800 sm:aspect-[16/9]">
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 overflow-hidden rounded-2xl bg-brand-950 text-white">
+      <div className="relative aspect-[16/10] w-full sm:aspect-[16/9]">
         {playing && clips.length > 0 ? (
           <SkeletonPlayer
             clips={clips}
             run={run}
-            speed={signSpeed}
+            speed={settings.signSpeed}
             onProgress={setProgress}
             onSegment={setActive}
             onDone={() => setPlaying(false)}
-            className="absolute inset-0 size-full p-2"
+            className="absolute inset-0 size-full p-2 pb-10"
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
@@ -77,52 +72,41 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
               onClick={play}
               className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-white/20"
             >
-              <RotateCcw className="size-4" aria-hidden="true" /> Putar ulang isyarat
+              <RotateCcw className="size-4" aria-hidden="true" /> Putar ulang
             </button>
           </div>
         )}
-        <AnimatePresence mode="wait">
-          {playing && words[active] && (
-            <motion.span
-              key={`${active}-${words[active].text}`}
-              initial={{ opacity: 0, y: -4, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="absolute left-2.5 top-2.5 rounded-full bg-white/15 px-3 py-1 text-sm font-extrabold backdrop-blur"
-            >
-              {words[active].text}
-            </motion.span>
-          )}
-        </AnimatePresence>
-        {playing && (
+
+        {settings.captions && playing && <SignCaption words={captionWords} active={active} size={settings.captionSize} />}
+
+        <div className="absolute right-2 top-2 flex gap-1">
           <button
             type="button"
-            onClick={() => setPlaying(false)}
-            aria-label="Hentikan isyarat"
-            className="absolute right-2.5 top-2.5 grid size-8 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+            onClick={() => settings.update({ captions: !settings.captions })}
+            aria-pressed={settings.captions}
+            aria-label={settings.captions ? 'Sembunyikan caption' : 'Tampilkan caption'}
+            className="grid size-8 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
           >
-            <Pause className="size-4" aria-hidden="true" />
+            {settings.captions ? <Captions className="size-4" aria-hidden="true" /> : <CaptionsOff className="size-4" aria-hidden="true" />}
           </button>
-        )}
-        <span className="absolute inset-x-2.5 bottom-2.5 h-1 overflow-hidden rounded-full bg-white/20" aria-hidden="true">
-          <span className="block h-full rounded-full bg-brand-200 transition-[width] duration-100" style={{ width: `${(playing ? progress : 1) * 100}%` }} />
+          {playing && (
+            <button
+              type="button"
+              onClick={() => setPlaying(false)}
+              aria-label="Hentikan isyarat"
+              className="grid size-8 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+            >
+              <Pause className="size-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+
+        <span className="absolute inset-x-0 bottom-0 h-1 bg-white/15" aria-hidden="true">
+          <span className={cn('block h-full bg-brand-200 transition-[width] duration-100')} style={{ width: `${(playing ? progress : 1) * 100}%` }} />
         </span>
       </div>
-      <ol ref={strip} className="flex gap-1 overflow-x-auto px-2.5 py-2 [scrollbar-width:none]" aria-label="Kata yang diperagakan">
-        {words.map((w, i) => (
-          <li
-            key={`${i}-${w.text}`}
-            aria-current={playing && i === active ? 'true' : undefined}
-            className={cn(
-              'shrink-0 rounded-full px-2 py-0.5 text-xs font-bold transition-colors duration-150',
-              playing && i === active ? 'bg-white text-brand-900' : playing && i < active ? 'text-white/80' : 'text-white/45',
-            )}
-          >
-            {w.text}
-          </li>
-        ))}
-      </ol>
-    </div>
+      {/* Pembaca layar: teks lengkap tanpa perlu mengikuti animasi. */}
+      <p className="sr-only">{text}</p>
+    </motion.div>
   );
 }

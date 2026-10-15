@@ -1,20 +1,25 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 /**
- * Pengaturan tampilan siswa (halaman Pengaturan). Disimpan di localStorage perangkat ini.
+ * Pengaturan tampilan siswa (halaman Profil). Disimpan di localStorage perangkat ini.
  *  - textScale    perbesar teks (root font-size; semua ukuran memakai rem)
  *  - signSpeed    kecepatan animasi isyarat
  *  - autoPlaySign jawaban chatbot baru langsung diperagakan
  *  - autoSpeak    jawaban chatbot baru langsung dibacakan (TTS)
+ *  - captions     tampilkan caption di atas animasi isyarat / video
+ *  - captionSize  ukuran caption: S, M, L
  */
+export type CaptionSize = 'S' | 'M' | 'L';
 export type Settings = {
   textScale: 0 | 1 | 2;
   signSpeed: 0.75 | 1 | 1.25;
   autoPlaySign: boolean;
   autoSpeak: boolean;
+  captions: boolean;
+  captionSize: CaptionSize;
 };
 
-const DEFAULTS: Settings = { textScale: 0, signSpeed: 1, autoPlaySign: true, autoSpeak: false };
+const DEFAULTS: Settings = { textScale: 0, signSpeed: 1, autoPlaySign: true, autoSpeak: false, captions: true, captionSize: 'M' };
 const KEY = 'isyara.settings';
 
 function load(): Settings {
@@ -25,6 +30,8 @@ function load(): Settings {
       signSpeed: [0.75, 1, 1.25].includes(raw.signSpeed as number) ? (raw.signSpeed as Settings['signSpeed']) : DEFAULTS.signSpeed,
       autoPlaySign: typeof raw.autoPlaySign === 'boolean' ? raw.autoPlaySign : DEFAULTS.autoPlaySign,
       autoSpeak: typeof raw.autoSpeak === 'boolean' ? raw.autoSpeak : DEFAULTS.autoSpeak,
+      captions: typeof raw.captions === 'boolean' ? raw.captions : DEFAULTS.captions,
+      captionSize: ['S', 'M', 'L'].includes(raw.captionSize as string) ? (raw.captionSize as CaptionSize) : DEFAULTS.captionSize,
     };
   } catch {
     return DEFAULTS;
@@ -57,3 +64,4 @@ export function useSettings() {
 }
 
 export const TEXT_SCALE_LABEL = ['Normal', 'Besar', 'Sangat besar'] as const;
+export const CAPTION_SIZE_LABEL: Record<CaptionSize, string> = { S: 'Kecil', M: 'Sedang', L: 'Besar' };

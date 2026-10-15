@@ -33,6 +33,7 @@ dependencies = [
   "cryptography==50.0.1",    # ADR-039 D3: EC P-256 backend for PyJWT; pulls cffi (unpinned)
   "httpx==0.28.1",           # ADR-046: Supabase Storage REST client (was test-only); also TestClient transport
   "python-multipart==0.0.32",  # ADR-046: multipart parser required by FastAPI/Starlette form uploads
+  "pypdf==6.20.1",           # ADR-053: text extraction from uploaded PDF material; pure Python, no deps
 ]
 
 [project.optional-dependencies]

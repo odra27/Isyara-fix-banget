@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { isDevMode } from '@/lib/utils';
 
 /**
- * Error boundary (PRD-FE §9: aplikasi tidak boleh blank kalau satu modul crash).
+ * Error boundary (PRD.md §12: aplikasi tidak boleh blank kalau satu modul crash).
  *
  * Tiga level pemakaian:
  *  - 'app'   : jaring terakhir di main.tsx. Layar penuh + tombol muat ulang.

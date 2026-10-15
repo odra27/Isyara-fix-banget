@@ -13,7 +13,7 @@ import { useHandTracking } from './useHandTracking';
 import { useSignFlow, type SignPhase } from './useSignFlow';
 
 /**
- * Panel Siswa (Alur A, mode Kiosk kelas). Kamera + indikator status wajib (PRD-FE §4.2) + hasil (§6).
+ * Panel Siswa (Alur A, mode Kiosk kelas). Kamera + indikator status wajib (SYSTEM_DESIGN.md §9.4) + hasil (§9.5).
  * Semua status: warna + ikon + TEKS, dan diumumkan lewat aria-live.
  */
 const STATUS: Record<SignPhase, { text: string; sub: string }> = {

@@ -19,8 +19,8 @@ const POINTS: { icon: IconName; title: string; desc: string }[] = [
   },
   {
     icon: 'users',
-    title: 'Kelas yang saling memahami',
-    desc: 'Mode kiosk membantu siswa Tuli dan guru berkomunikasi dua arah langsung di kelas, lewat isyarat, teks, dan suara.',
+    title: 'Tanya tepat di bagian yang bikin bingung',
+    desc: 'Saat menonton video, siswa bisa langsung bertanya pada menit tertentu. ISYARA menjawab berdasarkan isi bagian itu.',
   },
 ];
 export function Why() {

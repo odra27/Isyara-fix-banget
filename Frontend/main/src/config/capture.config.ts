@@ -1,5 +1,5 @@
 /**
- * Guard rail auto-capture (PRD §9, PRD-FE §4.1).
+ * Guard rail auto-capture (SYSTEM_DESIGN.md §9.2).
  * WAJIB dikalibrasi di device asli sebelum demo. Pakai ?dev=1 untuk melihat nilai motion & timer secara live.
  */
 // Nilai disamakan dengan ml/config/default.yaml → capture: (dipakai saat model diuji).

@@ -2,7 +2,7 @@ import { CAPTURE, type CaptureConfig } from '@/config/capture.config';
 import type { HandFrame, Landmark } from '@/types/kiosk';
 
 /**
- * State machine auto-capture (PRD §9, PRD-FE §4.1) sebagai fungsi MURNI:
+ * State machine auto-capture (SYSTEM_DESIGN.md §9.1) sebagai fungsi MURNI:
  *   stepCapture(state, frame | null, now) → { state, event? }
  * Tidak menyentuh DOM/kamera sehingga bisa di-unit-test dengan frame sintetis.
  *
@@ -76,7 +76,7 @@ function finish(s: CaptureState, reason: StopReason, now: number, cfg: CaptureCo
   const durationMs = end - (s.detectedAt ?? end);
   const event: CaptureEvent =
     durationMs < cfg.minRecordMs ? { type: 'noise', reason, durationMs } : { type: 'stop', reason, frames: s.frames, durationMs };
-  // Buffer dibuang dari state (privasi, PRD-FE §9).
+  // Buffer dibuang dari state (privasi, SYSTEM_DESIGN.md §12).
   return { state: initialCapture(), event };
 }
 

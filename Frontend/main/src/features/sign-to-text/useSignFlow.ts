@@ -8,7 +8,7 @@ import type { CaptureEvent } from './autoCapture';
 import { useAutoCapture } from './useAutoCapture';
 
 /**
- * Alur A: isyarat → teks + suara (PRD-FE §4 & §6).
+ * Alur A: isyarat → teks + suara (SYSTEM_DESIGN.md §3.5 & §9).
  * IDLE → HAND_DETECTED → RECORDING → PROCESSING → RESULT(accepted | confirmed | belum dikenali) → IDLE
  */
 export type SignPhase = 'IDLE' | 'HAND_DETECTED' | 'RECORDING' | 'PROCESSING' | 'RESULT';
@@ -21,7 +21,7 @@ export function useSignFlow(active: boolean) {
   const reqId = useRef(0);
 
   // Auto-capture hanya jalan bila panel aktif, tidak sedang proses/hasil,
-  // dan guru tidak sedang bicara/memutar animasi isyarat (arbitrase PRD-FE §7.3).
+  // dan guru tidak sedang bicara/memutar animasi isyarat (arbitrase SYSTEM_DESIGN.md §3.6).
   const captureEnabled = active && !k.speechActive && stage === 'capture' && k.signFallback === null;
 
   const deliver = useCallback(

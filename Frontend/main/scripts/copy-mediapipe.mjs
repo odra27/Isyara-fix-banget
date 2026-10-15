@@ -1,6 +1,6 @@
 // Salin aset MediaPipe ke public/mediapipe/ supaya kiosk tidak butuh CDN/internet:
 //   - wasm runtime dari node_modules/@mediapipe/tasks-vision/wasm
-//   - model .task dari ml/mp_models (model yang SAMA dengan training, lihat note.md §3)
+//   - model .task dari ml/mp_models (model yang SAMA dengan training, lihat SYSTEM_DESIGN.md §9.3)
 // Dijalankan otomatis oleh `npm run dev` / `npm run build` (script predev/prebuild).
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

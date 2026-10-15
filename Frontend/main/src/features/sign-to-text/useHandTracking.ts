@@ -4,7 +4,7 @@ import { buildHandFrame, type RawFrame } from './landmarkFrame';
 import { frameBus } from './frameBus';
 
 /**
- * MediaPipe Hand + Pose di browser → frameBus (note.md §3).
+ * MediaPipe Hand + Pose di browser → frameBus (SYSTEM_DESIGN.md §9.3).
  *
  * Aturan capture yang wajib (kalau tidak, akurasi turun):
  *   - MediaPipe dijalankan pada frame kamera ASLI (tidak di-mirror). Mirror hanya CSS preview.

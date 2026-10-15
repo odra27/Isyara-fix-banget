@@ -8,7 +8,7 @@ const POINTS: { icon: IconName; title: string; desc: string }[] = [
   {
     icon: 'keyboard',
     title: 'Ketik atau berisyarat',
-    desc: 'Pakai keyboard, atau isyaratkan ke kamera. Model kami mengenali 43 kata BISINDO terlatih dan mengubahnya jadi teks.',
+    desc: 'Pakai keyboard, atau isyaratkan ke kamera. Model kami mengenali kosakata BISINDO terlatih dan mengubahnya jadi teks.',
   },
   {
     icon: 'hand',

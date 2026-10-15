@@ -7,7 +7,7 @@ const ITEMS: { icon: IconName; title: string; desc: string }[] = [
   {
     icon: 'target',
     title: 'Bukan penerjemah umum',
-    desc: 'Pengenalan isyarat fokus pada 43 kata BISINDO terlatih. Untuk kalimat lain, siswa tetap bisa mengetik.',
+    desc: 'Pengenalan isyarat fokus pada kosakata BISINDO yang sudah dilatih. Untuk kalimat lain, siswa tetap bisa mengetik.',
   },
   {
     icon: 'eyeOff',

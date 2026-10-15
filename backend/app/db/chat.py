@@ -18,7 +18,8 @@ from uuid import UUID
 from psycopg import AsyncConnection
 
 _SESSION_COLS = "id, title, created_at, updated_at"
-_MESSAGE_COLS = "id, session_id, role, content, input_mode, created_at"
+_MESSAGE_COLS = "id, session_id, role, content, input_mode, created_at, video_id, video_t_sec"
+_DOC_COLS = "id, session_id, filename, page_count, char_count, created_at"
 
 
 @dataclass(frozen=True)
@@ -37,17 +38,71 @@ class ChatMessage:
     content: str
     input_mode: str | None  # 'text' | 'sign' for user rows, None for assistant rows
     created_at: datetime
+    video_id: str | None = None  # ADR-053: user question asked while watching this video
+    video_t_sec: int | None = None  # ... at this playback second
+
+
+@dataclass(frozen=True)
+class ChatDocument:
+    """Metadata of an uploaded PDF (ADR-053). The text itself is only read for the model."""
+
+    id: UUID
+    session_id: UUID
+    filename: str
+    page_count: int
+    char_count: int
+    created_at: datetime
+
+
+@dataclass(frozen=True)
+class StudentDocument:
+    document: ChatDocument
+    session_title: str
+
+
+@dataclass(frozen=True)
+class ChatActivity:
+    video_questions: int  # user questions asked from a video page
+    documents: int  # PDFs uploaded
 
 
 class ChatRepository(Protocol):
-    async def list_sessions(self, student_id: UUID, *, limit: int, offset: int) -> tuple[list[ChatSession], int]: ...
-    async def create_session(self, student_id: UUID, title: str) -> ChatSession: ...
-    async def get_session(self, student_id: UUID, session_id: UUID) -> ChatSession | None: ...
-    async def rename_session(self, student_id: UUID, session_id: UUID, title: str) -> ChatSession | None: ...
-    async def delete_session(self, student_id: UUID, session_id: UUID) -> bool: ...
-    async def list_messages(self, session_id: UUID, *, limit: int) -> list[ChatMessage]: ...
+    async def list_sessions(self, student_id: UUID, *, limit: int,
+                            offset: int) -> tuple[list[ChatSession], int]: ...
+
+    async def create_session(self, student_id: UUID,
+                             title: str) -> ChatSession: ...
+
+    async def get_session(self, student_id: UUID,
+                          session_id: UUID) -> ChatSession | None: ...
+
+    async def rename_session(
+        self, student_id: UUID, session_id: UUID, title: str) -> ChatSession | None: ...
+
+    async def delete_session(self, student_id: UUID,
+                             session_id: UUID) -> bool: ...
+
+    async def list_messages(self, session_id: UUID, *,
+                            limit: int) -> list[ChatMessage]: ...
+
     async def append_exchange(self, session_id: UUID, *, user_content: str, input_mode: str,
-                              assistant_content: str, new_title: str | None) -> tuple[ChatMessage, ChatMessage, ChatSession]: ...
+                              assistant_content: str, new_title: str | None,
+                              video_id: str | None = None, video_t_sec: int | None = None,
+                              ) -> tuple[ChatMessage, ChatMessage, ChatSession]: ...
+
+    async def add_document(self, session_id: UUID, *, filename: str, page_count: int,
+                           content: str) -> ChatDocument: ...
+
+    async def session_documents(
+        self, session_id: UUID) -> list[ChatDocument]: ...
+
+    async def document_texts(self, session_id: UUID, *,
+                             limit: int) -> list[tuple[str, str]]: ...
+
+    async def list_documents(self, student_id: UUID, *,
+                             limit: int) -> list[StudentDocument]: ...
+    async def activity(self, student_id: UUID,
+                       since: datetime) -> ChatActivity: ...
 
 
 class PostgresChatRepository:
@@ -110,13 +165,15 @@ class PostgresChatRepository:
         return [ChatMessage(*r) for r in rows]
 
     async def append_exchange(self, session_id: UUID, *, user_content: str, input_mode: str,
-                              assistant_content: str, new_title: str | None) -> tuple[ChatMessage, ChatMessage, ChatSession]:
+                              assistant_content: str, new_title: str | None,
+                              video_id: str | None = None, video_t_sec: int | None = None,
+                              ) -> tuple[ChatMessage, ChatMessage, ChatSession]:
         async with self._conn.transaction():
             async with self._conn.cursor() as cur:
                 await cur.execute(
-                    "insert into chat_messages (session_id, role, content, input_mode)"
-                    f" values (%s, 'user', %s, %s) returning {_MESSAGE_COLS}",
-                    (session_id, user_content, input_mode),
+                    "insert into chat_messages (session_id, role, content, input_mode, video_id, video_t_sec)"
+                    f" values (%s, 'user', %s, %s, %s, %s) returning {_MESSAGE_COLS}",
+                    (session_id, user_content, input_mode, video_id, video_t_sec),
                 )
                 user = ChatMessage(*(await cur.fetchone()))
                 await cur.execute(
@@ -132,3 +189,64 @@ class PostgresChatRepository:
                 )
                 session = ChatSession(*(await cur.fetchone()))
         return user, assistant, session
+
+    # ---- ADR-053: uploaded PDFs (text only) and activity counters ---------------------
+
+    async def add_document(self, session_id: UUID, *, filename: str, page_count: int,
+                           content: str) -> ChatDocument:
+        async with self._conn.transaction():
+            async with self._conn.cursor() as cur:
+                await cur.execute(
+                    "insert into chat_documents (session_id, filename, page_count, content)"
+                    " values (%s, %s, %s, %s)"
+                    " returning id, session_id, filename, page_count, length(content), created_at",
+                    (session_id, filename, page_count, content),
+                )
+                doc = ChatDocument(*(await cur.fetchone()))
+                await cur.execute("update chat_sessions set updated_at = now() where id = %s", (session_id,))
+        return doc
+
+    async def session_documents(self, session_id: UUID) -> list[ChatDocument]:
+        async with self._conn.cursor() as cur:
+            await cur.execute(
+                "select id, session_id, filename, page_count, length(content), created_at"
+                " from chat_documents where session_id = %s order by created_at asc, id asc",
+                (session_id,),
+            )
+            rows = await cur.fetchall()
+        return [ChatDocument(*r) for r in rows]
+
+    async def document_texts(self, session_id: UUID, *, limit: int) -> list[tuple[str, str]]:
+        # Newest first: the most recent upload gets the context budget first.
+        async with self._conn.cursor() as cur:
+            await cur.execute(
+                "select filename, content from chat_documents where session_id = %s"
+                " order by created_at desc, id desc limit %s",
+                (session_id, limit),
+            )
+            rows = await cur.fetchall()
+        return [(r[0], r[1]) for r in rows]
+
+    async def list_documents(self, student_id: UUID, *, limit: int) -> list[StudentDocument]:
+        async with self._conn.cursor() as cur:
+            await cur.execute(
+                "select d.id, d.session_id, d.filename, d.page_count, length(d.content), d.created_at, s.title"
+                " from chat_documents d join chat_sessions s on s.id = d.session_id"
+                " where s.student_id = %s order by d.created_at desc, d.id desc limit %s",
+                (student_id, limit),
+            )
+            rows = await cur.fetchall()
+        return [StudentDocument(ChatDocument(*r[:6]), r[6]) for r in rows]
+
+    async def activity(self, student_id: UUID, since: datetime) -> ChatActivity:
+        async with self._conn.cursor() as cur:
+            await cur.execute(
+                "select"
+                " (select count(*) from chat_messages m join chat_sessions s on s.id = m.session_id"
+                "   where s.student_id = %s and m.role = 'user' and m.video_id is not null and m.created_at >= %s),"
+                " (select count(*) from chat_documents d join chat_sessions s on s.id = d.session_id"
+                "   where s.student_id = %s and d.created_at >= %s)",
+                (student_id, since, student_id, since),
+            )
+            q, d = await cur.fetchone()
+        return ChatActivity(video_questions=int(q), documents=int(d))

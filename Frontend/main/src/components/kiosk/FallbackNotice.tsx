@@ -6,7 +6,7 @@ import { mockControls } from '@/services/matching.service';
 import type { FallbackReason } from '@/types/kiosk';
 
 /**
- * Notifikasi non-modal saat satu sisi beralih ke mode manual (PRD-FE §8).
+ * Notifikasi non-modal saat satu sisi beralih ke mode manual (SYSTEM_DESIGN.md §9.5).
  * Menyebut sisi mana yang terdampak + tombol "coba aktifkan lagi" tanpa reload.
  */
 const COPY: Record<'sign' | 'speech', Record<FallbackReason, { title: string; body: string; retry: string }>> = {

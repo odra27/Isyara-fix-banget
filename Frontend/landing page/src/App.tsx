@@ -6,8 +6,6 @@ import { FeatureStrip } from './components/landing/FeatureStrip';
 import { Why } from './components/landing/Why';
 import { Materi } from './components/landing/Materi';
 import { Chatbot } from './components/landing/Chatbot';
-import { RevealScene } from './components/landing/RevealScene';
-import { TwoWay } from './components/landing/TwoWay';
 import { HowItWorks } from './components/landing/HowItWorks';
 import { Confidence } from './components/landing/Confidence';
 import { Vocabulary } from './components/landing/Vocabulary';
@@ -36,8 +34,6 @@ export default function App() {
         <Why />
         <Materi />
         <Chatbot />
-        <RevealScene />
-        <TwoWay />
         <HowItWorks />
         <Confidence />
         <Vocabulary />

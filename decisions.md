@@ -2513,3 +2513,32 @@ The product moves from a Puskesmas counter kiosk (Deaf patient ↔ staff) to an 
 2. `POST /api/student/auth/refresh {refresh_token}` exchanges a Supabase refresh token (`grant_type=refresh_token`) for a new pair and re-checks role `siswa` + active profile. Failure → `401 INVALID_CREDENTIALS`, Supabase down → `503 AUTH_UNAVAILABLE`.
 3. The FE stores access + refresh token and expiry in localStorage, refreshes on app start and ~2 min before expiry, and retries a request once after a 401. Idle limit 14 days. Refresh rejected → session cleared → login form. Server unreachable → session kept.
 4. Operator scripts: `backend/scripts/apply_migrations.py` (idempotent migrations only) and `backend/scripts/create_student.py` (Supabase Admin API + `student_profiles`, rollback on failure).
+
+# ADR-053 — Chat-First Student App: Video Questions, PDF Material, Hidden Kiosk
+
+**Status:** Accepted (requested by the project owner, 2026-10-14)
+**Supersedes:** ADR-051 D1 (Mode Kiosk as a menu feature), ADR-051 D6 (learning videos on the home page, no backend materials data), ADR-051 D8 "existing schema unchanged" (this ADR adds columns + one table); the Frontend mock/demo modes.
+**Relates to:** ADR-006/007 (thresholds, unchanged), ADR-012 (privacy), ADR-046 (upload validation pattern), ADR-048 (RLS model), ADR-051 D3/D4, ADR-052.
+
+## Context
+Reviewers found the app unfocused: kiosk, a home page full of videos and a chatbot competed as three equal features. The core value of ISYARA is turning learning content into something a Deaf student can follow (plain text, captions, sign animation, Q&A). Target users: Deaf students in SD grades 4–6 first (the largest drop-out point is SD → SMP); SMP–SMA/SMK is roadmap.
+
+## Decisions
+1. **Chat-first app.** The home route is **Tanya ISYARA** (`/chat`): an empty state with the mascot and "Mau belajar apa hari ini?", then the same page becomes the conversation. Sidebar: *Tanya ISYARA, Video Pelajaran, Materi Saya*, the 4 most recent chats + "Lihat semua" (`/riwayat`), profile card (`/profil`, includes settings). Sign input (camera → `POST /api/match/sign` → words) lives in the chat composer as **"Pakai isyarat"**. The vocabulary size is not shown in the UI.
+2. **Kiosk hidden.** `/kiosk` stays reachable by URL as a fallback for class demos, but is not in any menu. Backend kiosk/staff endpoints are unchanged.
+3. **Questions from a video (tanya per detik).** `POST /api/chat/sessions/{id}/messages` accepts an optional `video: {id, section, t_sec}`. The Backend validates the id and section against its own transcript catalog (`backend/app/learning/catalog.py`, a copy of the section texts in `Frontend/main/src/data/materi.ts`) and adds that section plus its neighbours to the model prompt as a **second system message**. The FE never sends transcript text. The user message stores `video_id` + `video_t_sec` (shown as a time chip; counted on the profile page). Unknown id / section / extra fields → `422 VALIDATION_ERROR` before the model is called.
+4. **PDF material.** `POST /api/chat/sessions/{id}/documents` (multipart, exactly one `file` part) accepts a **text-based** PDF ≤ 5 MB and ≤ 10 pages, at most 5 per chat. Text is extracted in memory with `pypdf==6.20.1` (new dependency, pure Python); the PDF bytes are discarded and only the cleaned text (≤ 20 000 chars) is stored in `chat_documents`. The 2 newest documents of the session are added to the model prompt (≤ 12 000 chars), fenced with `<<< >>>` and an instruction to ignore commands inside the material. Scans / photos (no text layer) are rejected with `422 DOCUMENT_NO_TEXT` instead of being sent to an OCR or vision model. Other errors: `422 DOCUMENT_INVALID`, `413 DOCUMENT_TOO_LARGE`. Deleting a chat deletes its documents (FK cascade). Ownership is checked before the file is parsed. **Privacy:** document text is sent to OpenRouter under the same approval as ADR-051 D4; students should not upload personal data (shown in the UI copy).
+5. **Read endpoints.** `GET /api/chat/documents` (own documents, newest first, with session title) and `GET /api/chat/activity` (last 7 days: `video_questions` = user messages with a `video_id`, normal chat is not counted; `documents`).
+6. **Backup OpenRouter keys.** `OPENROUTER_API_KEYS` (comma separated, optional) is tried in order after `OPENROUTER_API_KEY` when a key answers 401/402/403/429. Timeouts and 5xx are not retried with another key. Keys are never logged or put in `repr`.
+7. **No demo mode.** The FE always talks to the Backend. Mock auth/chat/matching services and "Mode demo" texts are removed from the student app (the `?dev=1` simulator inside the hidden kiosk keeps its mock controls). If the Backend is down the UI says "Tidak bisa terhubung ke server". The login page may show a **"Akun siap pakai"** box filled from `VITE_DEMO_NIS` / `VITE_DEMO_PASSWORD` (empty = hidden); never set it in a public build.
+8. **Learning videos.** Moved to *Video Pelajaran* (`/video`, "Lanjutkan menonton" on top) with teacher name per video; watch page `/video/:id` with a fixed-size side chat, YouTube-style captions (S/M/L, active word highlighted), chapters on the progress bar, speed, loop section, fullscreen with an in-player "Tanya" panel. Watch progress, saved videos and the per-video chat id are stored in localStorage per student.
+9. **Unchanged:** confidence thresholds and decision logic, `/api/match/sign` contract, Modeling boundary, staff/admin APIs, ADR-012 (no landmarks/audio/video stored).
+
+## Migration
+`Database/migrations/20261014000000_adr053_chat_video_context_documents.sql` — additive and idempotent (`add column if not exists`, `create table if not exists`, RLS enabled without policies). Registered in `backend/scripts/apply_migrations.py`.
+
+## Open items
+1. Transcript catalog is duplicated FE/BE until a materials table/CMS exists.
+2. OCR for photos of worksheets (needs a vision-capable model and a privacy decision).
+3. Retention policy for chat history and documents (ADR-051 open item 3 still open).
+4. Teacher role to send material to a class (ADR-051 open item 4).

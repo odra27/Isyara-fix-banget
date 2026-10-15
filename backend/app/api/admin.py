@@ -40,9 +40,11 @@ ADMIN_PREFIX = "/api/admin"
 
 router = APIRouter(prefix=ADMIN_PREFIX, dependencies=[Depends(require_admin)])
 
-# ADR-041 §3: documented project categories (PRD §7, PRD-BE §7), application-level only.
-PHRASE_CATEGORIES = ("Pendaftaran", "Keluhan", "Obat", "Administrasi", "Fallback")
-Category = Literal["Pendaftaran", "Keluhan", "Obat", "Administrasi", "Fallback"]
+# ADR-041 §3: documented project categories (PRD.md §10, SYSTEM_DESIGN.md §7), application-level only.
+PHRASE_CATEGORIES = ("Pendaftaran", "Keluhan", "Obat",
+                     "Administrasi", "Fallback")
+Category = Literal["Pendaftaran", "Keluhan",
+                   "Obat", "Administrasi", "Fallback"]
 
 _CONFLICT = "Resource conflicts with existing data"
 
@@ -122,7 +124,8 @@ class PhrasePatch(BaseModel):
     @model_validator(mode="after")
     def _explicit_non_null_fields(self) -> "PhrasePatch":
         if not self.model_fields_set:
-            raise ValueError("at least one of phrase_text, category, active is required")
+            raise ValueError(
+                "at least one of phrase_text, category, active is required")
         for name in self.model_fields_set:
             if getattr(self, name) is None:
                 raise ValueError(f"{name} must not be null")
@@ -178,7 +181,8 @@ async def update_phrase(phrase_id: UUID, body: PhrasePatch, request: Request) ->
 class LogQuery(PageQuery):
     device_id: UUID | None = None
     predicted_phrase_id: UUID | None = None
-    resulted_action: Literal["accepted", "confirmed", "escalated_to_jbi"] | None = None
+    resulted_action: Literal["accepted", "confirmed",
+                             "escalated_to_jbi"] | None = None
     direction: Literal["sign_to_text", "speech_to_sign"] | None = None
     created_from: AwareDatetime | None = None  # inclusive
     created_to: AwareDatetime | None = None  # inclusive
@@ -212,7 +216,8 @@ async def list_logs(request: Request, q: Annotated[LogQuery, Query()]) -> Page[L
     )
     async with request.app.state.open_db() as db:
         rows, total = await _repo(db).list_logs(filters, limit=q.page_size, offset=q.offset)
-    items = [LogOut(**{**vars(r), "confidence": float(r.confidence)}) for r in rows]
+    items = [LogOut(**{**vars(r), "confidence": float(r.confidence)})
+             for r in rows]
     return Page[LogOut](items=items, page=q.page, page_size=q.page_size, total=total)
 
 
@@ -259,32 +264,41 @@ def _container_matches(mime: str, data: bytes) -> bool:
 async def _read_upload(request: Request) -> tuple[bytes, str]:
     content_type = request.headers.get("content-type", "")
     if not content_type.lower().startswith("multipart/form-data"):
-        raise UploadValidationError("Invalid request. body: multipart/form-data with a 'file' part is required")
+        raise UploadValidationError(
+            "Invalid request. body: multipart/form-data with a 'file' part is required")
     declared = request.headers.get("content-length")
     if declared is not None and declared.isdigit() and int(declared) > MAX_REFERENCE_BYTES + _MULTIPART_SLACK_BYTES:
-        raise UploadValidationError("Invalid request. file: exceeds the maximum size of 50 MB")
+        raise UploadValidationError(
+            "Invalid request. file: exceeds the maximum size of 50 MB")
     try:
         form = await request.form(max_files=1, max_fields=1)
     except HTTPException:
-        raise UploadValidationError("Invalid request. body: malformed multipart body") from None
+        raise UploadValidationError(
+            "Invalid request. body: malformed multipart body") from None
     try:
         keys = set(form.keys())
         if keys != {"file"} or len(form.getlist("file")) != 1:
             # Only one `file` part; any other field (e.g. a path or bucket) is rejected (ADR-040 §9).
-            raise UploadValidationError("Invalid request. body: exactly one 'file' part and no other fields allowed")
+            raise UploadValidationError(
+                "Invalid request. body: exactly one 'file' part and no other fields allowed")
         upload = form["file"]
         if not isinstance(upload, UploadFile):
-            raise UploadValidationError("Invalid request. file: must be a file upload")
+            raise UploadValidationError(
+                "Invalid request. file: must be a file upload")
         mime = (upload.content_type or "").split(";")[0].strip().lower()
         if mime not in ALLOWED_MIME_TYPES:
-            raise UploadValidationError("Invalid request. file: only video/mp4 and video/webm are allowed")
+            raise UploadValidationError(
+                "Invalid request. file: only video/mp4 and video/webm are allowed")
         data = await upload.read(MAX_REFERENCE_BYTES + 1)
         if len(data) > MAX_REFERENCE_BYTES:
-            raise UploadValidationError("Invalid request. file: exceeds the maximum size of 50 MB")
+            raise UploadValidationError(
+                "Invalid request. file: exceeds the maximum size of 50 MB")
         if not data:
-            raise UploadValidationError("Invalid request. file: must not be empty")
+            raise UploadValidationError(
+                "Invalid request. file: must not be empty")
         if not _container_matches(mime, data):
-            raise UploadValidationError("Invalid request. file: content does not match the declared video type")
+            raise UploadValidationError(
+                "Invalid request. file: content does not match the declared video type")
         return data, mime
     finally:
         await form.close()
@@ -309,14 +323,16 @@ async def upload_reference(phrase_id: UUID, request: Request) -> ReferenceOut:
         if await repo.get_phrase(phrase_id) is None:
             raise PhraseNotFound("Phrase not found")
         if await repo.has_approved_reference(phrase_id):
-            raise Conflict(_CONFLICT)  # ADR-042 §6: never replace or unapprove silently
+            # ADR-042 §6: never replace or unapprove silently
+            raise Conflict(_CONFLICT)
 
     storage = request.app.state.storage
     if storage is None:
         raise StorageError("Storage service unavailable")
 
     reference_id = uuid4()
-    object_path = f"{phrase_id}/{reference_id}.{ALLOWED_MIME_TYPES[mime]}"  # server-generated only
+    # server-generated only
+    object_path = f"{phrase_id}/{reference_id}.{ALLOWED_MIME_TYPES[mime]}"
     await storage.upload(object_path, data, mime)
     del data
 
@@ -374,8 +390,10 @@ class StaffCreate(BaseModel):
     email: StrictStr = Field(min_length=3, max_length=320)
     password: StrictStr = Field(min_length=8, max_length=1024)
     full_name: StrictStr = Field(min_length=1)
-    nip: StrictStr | None = Field(default=None, min_length=1, max_length=50)  # staff_profiles varchar(50)
-    username: StrictStr | None = Field(default=None, min_length=1, max_length=50)
+    # staff_profiles varchar(50)
+    nip: StrictStr | None = Field(default=None, min_length=1, max_length=50)
+    username: StrictStr | None = Field(
+        default=None, min_length=1, max_length=50)
     role: Literal["admin", "petugas"]
     unit_kerja: StrictStr = Field(min_length=1)
     job_title: StrictStr = Field(min_length=1)
@@ -399,7 +417,8 @@ class StaffCreate(BaseModel):
         _non_blank(v, info.field_name)
         if v is not None and ("@" in v or v != v.strip()):
             # "@" would make the login resolver treat it as an email (ADR-047 D5).
-            raise ValueError(f"{info.field_name} must not contain '@' or surrounding whitespace")
+            raise ValueError(
+                f"{info.field_name} must not contain '@' or surrounding whitespace")
         return v
 
     def login_identifiers(self) -> list[str]:
@@ -445,7 +464,8 @@ async def create_staff(
         async with open_db() as db:
             row = await _staff_repo(db).create_profile(
                 staff_id=user_id,
-                institution_id=principal.institution_id,  # never from the request (ADR-047 D3)
+                # never from the request (ADR-047 D3)
+                institution_id=principal.institution_id,
                 full_name=body.full_name,
                 role=body.role,  # DB mirror of app_metadata.role (ADR-047 D2)
                 nip=body.nip,
@@ -473,7 +493,8 @@ async def list_staff(
 ) -> Page[StaffOut]:
     async with request.app.state.open_db() as db:
         rows, total = await _staff_repo(db).list_by_institution(
-            principal.institution_id, limit=q.page_size, offset=q.offset  # caller's own institution only
+            # caller's own institution only
+            principal.institution_id, limit=q.page_size, offset=q.offset
         )
     return Page[StaffOut](
         items=[StaffOut(**vars(r)) for r in rows], page=q.page, page_size=q.page_size, total=total

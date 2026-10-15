@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export type CameraStatus = 'idle' | 'starting' | 'ready' | 'denied' | 'unavailable' | 'ended';
 
 /**
- * Kamera depan untuk Alur A. Video hanya ditampilkan live, TIDAK direkam/disimpan (PRD-FE §9).
+ * Kamera depan untuk Alur A. Video hanya ditampilkan live, TIDAK direkam/disimpan (SYSTEM_DESIGN.md §12).
  * Stream dihentikan saat komponen unmount.
  */
 export function useCamera(opts: { onFailure?: (s: CameraStatus) => void } = {}) {

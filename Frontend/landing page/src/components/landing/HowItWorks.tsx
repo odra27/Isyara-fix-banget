@@ -8,7 +8,7 @@ type Step = { title: string; desc: string; glyph: ReactNode };
 const STEPS: Step[] = [
   {
     title: 'Siap',
-    desc: 'Kamera menunggu, baik di mode kiosk maupun chatbot. Tidak ada tombol yang perlu ditekan.',
+    desc: 'Tekan Pakai isyarat, lalu kamera menunggu. Rekaman mulai sendiri saat tangan terangkat.',
     glyph: <Icon name="hand" className="size-5 text-brand-600" />,
   },
   {
@@ -23,7 +23,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Memproses',
-    desc: 'Gerakan dicocokkan dengan 43 kosakata BISINDO terlatih.',
+    desc: 'Gerakan dicocokkan dengan kosakata BISINDO yang sudah dilatih.',
     glyph: <span className="size-5 rounded-full border-[3px] border-brand-100 border-t-brand-600" />,
   },
   {

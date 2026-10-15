@@ -7,7 +7,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* Jaring terakhir (PRD-FE §9): layar kiosk tidak boleh pernah blank. */}
+    {/* Jaring terakhir (PRD.md §12): layar kiosk tidak boleh pernah blank. */}
     <ErrorBoundary level="app" label="Kiosk">
       <App />
     </ErrorBoundary>
