@@ -4,7 +4,6 @@ import { Nav } from './components/landing/Nav';
 import { Hero } from './components/landing/Hero';
 import { FeatureStrip } from './components/landing/FeatureStrip';
 import { Why } from './components/landing/Why';
-import { Materi } from './components/landing/Materi';
 import { Chatbot } from './components/landing/Chatbot';
 import { HowItWorks } from './components/landing/HowItWorks';
 import { Confidence } from './components/landing/Confidence';
@@ -32,7 +31,6 @@ export default function App() {
         <Hero />
         <FeatureStrip />
         <Why />
-        <Materi />
         <Chatbot />
         <HowItWorks />
         <Confidence />

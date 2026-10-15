@@ -68,10 +68,12 @@ export default function ChatPage() {
     if (!activeId) setDraft('');
   }, [activeId]);
 
-  const scroller = useRef<HTMLDivElement>(null);
+  // Percakapan ikut gulir halaman (bukan panel sendiri), jadi pesan baru dikejar lewat window.
+  // Layar awal dilewati: di layar sempit halamannya bisa digulir, dan membukanya tidak boleh
+  // langsung melompat ke bawah.
   useLayoutEffect(() => {
-    const el = scroller.current;
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    if (chat.messages.length === 0 && !chat.sending) return;
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   }, [chat.messages.length, chat.sending]);
 
   const lastFresh = [...chat.messages].reverse().find((m) => m.role === 'assistant' && m.fresh);
@@ -155,8 +157,8 @@ export default function ChatPage() {
 
   // ---------- percakapan
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col lg:h-full lg:min-h-0">
-      <div ref={scroller} className="flex-1 overflow-y-auto pb-4 lg:min-h-0" aria-live="polite" aria-busy={chat.sending}>
+    <div className="mx-auto flex w-full max-w-3xl flex-col lg:flex-1">
+      <div className="flex-1 pb-4" aria-live="polite" aria-busy={chat.sending}>
         <div className="flex flex-col items-center pb-6 pt-2">
           <TigerMascot mood={mood} size="sm" />
           <p className="mt-2 max-w-full truncate px-4 text-sm font-extrabold text-brand-900">{active?.title ?? 'Percakapan baru'}</p>
@@ -197,15 +199,32 @@ export default function ChatPage() {
         )}
       </div>
 
-      <div className="sticky bottom-20 bg-gradient-to-t from-tint via-tint to-tint/0 pt-3 lg:static lg:bottom-auto">
-        {composer}
-        <p className="mt-1.5 px-2 text-center text-[0.6875rem] text-muted">
-          ISYARA bisa keliru, tanyakan juga ke gurumu. Lihat semua percakapan di{' '}
-          <Link to="/riwayat" className="font-bold text-brand-600 hover:underline">
-            Riwayat
-          </Link>
-          .
-        </p>
+      {/*
+        Kolom tanya menempel di bawah layar. Di lg ia menyentuh tepi bawah (bottom-0) dan jarak ke
+        tepi diurus pb-5 di sini, bukan oleh <main>, supaya tidak ada celah yang memperlihatkan
+        potongan percakapan dan tidak ada pergeseran saat halaman mencapai dasar.
+      */}
+      <div className="sticky bottom-20 z-10 pt-6 lg:bottom-0 lg:pb-5">
+        {/* Percakapan yang lewat di belakang kolom tanya diburamkan, lalu memudar ke atas. */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 backdrop-blur-md"
+          style={{
+            maskImage: 'linear-gradient(to top, #000 62%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to top, #000 62%, transparent)',
+          }}
+        />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-tint via-tint/85 to-transparent" />
+        <div className="relative">
+          {composer}
+          <p className="mt-1.5 px-2 text-center text-[0.6875rem] text-muted">
+            ISYARA bisa keliru, tanyakan juga ke gurumu. Lihat semua percakapan di{' '}
+            <Link to="/riwayat" className="font-bold text-brand-600 hover:underline">
+              Riwayat
+            </Link>
+            .
+          </p>
+        </div>
       </div>
     </div>
   );

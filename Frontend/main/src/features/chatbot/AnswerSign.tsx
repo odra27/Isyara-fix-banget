@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
  * Klip baru dibuat saat pertama diputar (bukan untuk semua pesan riwayat sekaligus), supaya
  * membuka riwayat panjang tetap ringan. Teksnya tampil sebagai caption gaya YouTube (ADR-053).
  */
-export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean }) {
+export function AnswerSign({ text, autoPlay, compact = false }: { text: string; autoPlay: boolean; compact?: boolean }) {
   const settings = useSettings();
   const [started, setStarted] = useState(autoPlay);
   const [playing, setPlaying] = useState(autoPlay);
@@ -52,6 +52,11 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
     );
   }
 
+  // Di kotak sempit caption diletakkan di bawah animasi, jadi isyarat tidak perlu disisakan ruang.
+  const caption = settings.captions && playing && (
+    <SignCaption words={captionWords} active={active} size={settings.captionSize} inline={compact} />
+  );
+
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 overflow-hidden rounded-2xl bg-brand-950 text-white">
       <div className="relative aspect-[16/10] w-full sm:aspect-[16/9]">
@@ -63,7 +68,7 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
             onProgress={setProgress}
             onSegment={setActive}
             onDone={() => setPlaying(false)}
-            className="absolute inset-0 size-full p-2 pb-10"
+            className={cn('absolute inset-0 size-full p-2', compact ? 'pb-2' : 'pb-10')}
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
@@ -77,7 +82,7 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
           </div>
         )}
 
-        {settings.captions && playing && <SignCaption words={captionWords} active={active} size={settings.captionSize} />}
+        {!compact && caption}
 
         <div className="absolute right-2 top-2 flex gap-1">
           <button
@@ -105,6 +110,7 @@ export function AnswerSign({ text, autoPlay }: { text: string; autoPlay: boolean
           <span className={cn('block h-full bg-brand-200 transition-[width] duration-100')} style={{ width: `${(playing ? progress : 1) * 100}%` }} />
         </span>
       </div>
+      {compact && caption}
       {/* Pembaca layar: teks lengkap tanpa perlu mengikuti animasi. */}
       <p className="sr-only">{text}</p>
     </motion.div>

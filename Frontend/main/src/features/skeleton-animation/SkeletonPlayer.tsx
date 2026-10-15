@@ -31,24 +31,34 @@ type Props = {
   onDone?: () => void;
   /** Kecepatan putar (1 = asli). Default SKELETON.speed. */
   speed?: number;
+  /**
+   * Mulai dari posisi ini (0..1 dari total durasi), untuk melanjutkan setelah jeda atau melompat
+   * ke detik tertentu. Dibaca setiap kali pemutaran dimulai (lihat `run`), bukan saat berjalan.
+   */
+  startProgress?: number;
   className?: string;
 };
 
-export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, speed = SKELETON.speed, className }: Props) {
+export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, speed = SKELETON.speed, startProgress = 0, className }: Props) {
   const data = useMemo(() => buildTimeline(clips), [clips]);
   const [t, setT] = useState(0);
   const cb = useRef({ onProgress, onSegment, onDone });
   cb.current = { onProgress, onSegment, onDone };
+  // Dibaca lewat ref: mengubah posisi awal saja tidak boleh memulai ulang animasi yang berjalan.
+  const from = useRef(startProgress);
+  from.current = startProgress;
   const seg = useRef(-1);
 
   useEffect(() => {
     const total = SKELETON.holdStartMs + data.durationMs / speed + SKELETON.holdEndMs;
-    const t0 = performance.now();
+    const clipAt = (elapsed: number) => Math.min(data.durationMs, Math.max(0, (elapsed - SKELETON.holdStartMs) * speed));
+    const offset = Math.min(0.999, Math.max(0, from.current)) * total;
+    const t0 = performance.now() - offset;
     let raf = 0;
     let done = false;
     const tick = (now: number) => {
       const elapsed = now - t0;
-      const clipT = Math.min(data.durationMs, Math.max(0, (elapsed - SKELETON.holdStartMs) * speed));
+      const clipT = clipAt(elapsed);
       setT(clipT);
       cb.current.onProgress?.(Math.min(1, elapsed / total));
       const i = Math.max(0, data.spans.findIndex((s) => clipT <= s.end));
@@ -63,7 +73,7 @@ export function SkeletonPlayer({ clips, run = 0, onProgress, onSegment, onDone, 
       }
       raf = requestAnimationFrame(tick);
     };
-    setT(0);
+    setT(clipAt(offset));
     seg.current = -1;
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);

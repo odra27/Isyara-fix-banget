@@ -61,7 +61,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader
         eyebrow="Riwayat"
         title="Percakapanmu"

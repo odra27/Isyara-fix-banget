@@ -1,12 +1,14 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Bookmark, History, LoaderCircle, MessageCircle, PlaySquare, Plus, Settings } from 'lucide-react';
+import { Bookmark, History, LoaderCircle, MessageCircle, PlaySquare, Plus, Settings, X } from 'lucide-react';
 import { useAuth } from '@/auth/AuthContext';
 import { Avatar } from '@/auth/components/Avatar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Logo } from '@/components/ui/logo';
 import { APP } from '@/config/app.config';
+import { chatService, type ChatSession } from '@/features/chatbot/chat.service';
+import { DeleteChatDialog } from '@/features/chatbot/DeleteChatDialog';
 import { sessionsStore, useSessions } from '@/features/chatbot/sessions.store';
 import { cn } from '@/lib/utils';
 
@@ -30,7 +32,11 @@ export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const sessions = useSessions();
-  // Tanya ISYARA memakai tinggi layar penuh (percakapan + kolom tanya), halaman lain bergulir biasa.
+  /**
+   * Tanya ISYARA mengisi minimal satu layar supaya kolom tanya duduk di bawah walau percakapan
+   * masih pendek. Gulirnya tetap milik halaman (bukan panel sendiri), jadi siswa memakai scrollbar
+   * peramban seperti di halaman lain.
+   */
   const fullHeight = location.pathname.startsWith('/chat');
   const section = '/' + (location.pathname.split('/')[1] ?? '');
   const activeChat = location.pathname.startsWith('/chat/') ? location.pathname.split('/')[2] : null;
@@ -43,6 +49,44 @@ export function AppShell() {
 
   const newChat = () => navigate('/chat');
 
+  // ---------- hapus percakapan dari sidebar
+  const [confirm, setConfirm] = useState<ChatSession | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [failed, setFailed] = useState(false);
+  // Tombol X yang membuka dialog, supaya fokus bisa dikembalikan saat dibatalkan.
+  const trigger = useRef<HTMLButtonElement | null>(null);
+  // Setelah terhapus, tombol X-nya ikut hilang: fokus dipindah ke "Chat baru" agar tidak lepas.
+  const newChatBtn = useRef<HTMLButtonElement>(null);
+
+  const askDelete = (s: ChatSession, el: HTMLButtonElement) => {
+    trigger.current = el;
+    setFailed(false);
+    setConfirm(s);
+  };
+  const closeConfirm = () => {
+    setConfirm(null);
+    setFailed(false);
+    trigger.current?.focus();
+  };
+  const doDelete = async () => {
+    if (!confirm) return;
+    setDeleting(true);
+    try {
+      await chatService.remove(confirm.id);
+      sessionsStore.drop(confirm.id);
+      // Percakapan yang sedang dibuka ikut terhapus: mulai percakapan baru.
+      if (activeChat === confirm.id) navigate('/chat', { replace: true });
+      setConfirm(null);
+      setFailed(false);
+      trigger.current = null;
+      newChatBtn.current?.focus();
+    } catch {
+      setFailed(true);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-dvh bg-tint lg:grid lg:grid-cols-[16rem_1fr]">
       {/* ---------- Sidebar (desktop) ---------- */}
@@ -52,6 +96,7 @@ export function AppShell() {
         </a>
 
         <button
+          ref={newChatBtn}
           type="button"
           onClick={newChat}
           className="mb-3 flex h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3.5 text-sm font-extrabold text-brand-900 transition-colors hover:border-brand-200 hover:bg-brand-50"
@@ -100,17 +145,26 @@ export function AppShell() {
           ) : (
             <ul className="flex flex-col gap-0.5">
               {sessions.sessions.slice(0, RECENT).map((s) => (
-                <li key={s.id}>
+                <li key={s.id} className="group/chat relative">
                   <Link
                     to={`/chat/${s.id}`}
                     aria-current={s.id === activeChat ? 'page' : undefined}
                     className={cn(
-                      'block truncate rounded-xl px-3.5 py-2 text-[0.8125rem] transition-colors',
+                      'block truncate rounded-xl py-2 pl-3.5 pr-9 text-[0.8125rem] transition-colors',
                       s.id === activeChat ? 'bg-tint font-extrabold text-brand-900' : 'font-semibold text-brand-800 hover:bg-tint',
                     )}
                   >
                     {s.title}
                   </Link>
+                  <button
+                    type="button"
+                    onClick={(e) => askDelete(s, e.currentTarget)}
+                    aria-label={`Hapus percakapan ${s.title}`}
+                    title="Hapus percakapan"
+                    className="absolute right-1 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-brand-200 transition-colors hover:bg-rec-soft hover:text-rec focus-visible:text-rec group-hover/chat:text-muted"
+                  >
+                    <X className="size-3.5" aria-hidden="true" />
+                  </button>
                 </li>
               ))}
             </ul>
@@ -145,7 +199,8 @@ export function AppShell() {
 
       {/* ---------- Bar atas (mobile) ---------- */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white/90 px-4 backdrop-blur-xl lg:hidden">
-        <a href={APP.landingUrl} aria-label="ISYARA, ke halaman utama">
+        {/* flex: tanpa ini <a> tetap inline, logonya didudukkan di baseline teks dan tampak naik. */}
+        <a href={APP.landingUrl} aria-label="ISYARA, ke halaman utama" className="flex items-center">
           <Logo />
         </a>
         <div className="flex items-center gap-1.5">
@@ -163,7 +218,8 @@ export function AppShell() {
         id="konten"
         className={cn(
           'mx-auto w-full max-w-[84rem] px-4 pb-28 pt-5 md:px-8 md:pt-8 lg:pb-10',
-          fullHeight && 'lg:flex lg:h-dvh lg:flex-col lg:overflow-hidden lg:pb-5 lg:pt-6',
+          // pb-0: jarak bawah kolom tanya diurus ChatPage (kolomnya menempel ke tepi bawah layar).
+          fullHeight && 'lg:flex lg:min-h-dvh lg:flex-col lg:pb-0 lg:pt-6',
         )}
       >
         {/* Hanya animasi masuk (tanpa exit): <Outlet/> selalu merender rute baru, jadi exit akan berkedip. */}
@@ -172,7 +228,7 @@ export function AppShell() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className={cn(fullHeight && 'lg:flex lg:min-h-0 lg:flex-1 lg:flex-col')}
+          className={cn(fullHeight && 'lg:flex lg:flex-1 lg:flex-col')}
         >
           <ErrorBoundary label="Halaman" resetKey={location.pathname}>
             <Suspense fallback={<PageLoading />}>
@@ -207,6 +263,15 @@ export function AppShell() {
           ))}
         </ul>
       </nav>
+
+      <DeleteChatDialog
+        open={!!confirm}
+        title={confirm?.title ?? ''}
+        deleting={deleting}
+        failed={failed}
+        onCancel={closeConfirm}
+        onConfirm={() => void doDelete()}
+      />
     </div>
   );
 }

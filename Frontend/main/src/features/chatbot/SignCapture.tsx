@@ -95,7 +95,7 @@ export function SignCapture({ onWord, onClose }: { onWord: (text: string) => voi
 
   return (
     <motion.section
-      aria-label="Input isyarat"
+      aria-label="Input isyarat, fitur Beta"
       initial={{ opacity: 0, y: 12, height: 0 }}
       animate={{ opacity: 1, y: 0, height: 'auto' }}
       exit={{ opacity: 0, y: 8, height: 0 }}
@@ -152,9 +152,15 @@ export function SignCapture({ onWord, onClose }: { onWord: (text: string) => voi
         <div className="flex min-w-0 flex-col">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-sm font-extrabold">Tunjukkan isyarat ke kamera</p>
+              <p className="flex flex-wrap items-center gap-1.5 text-sm font-extrabold">
+                Tunjukkan isyarat ke kamera
+                <span className="rounded-full bg-[#FFD84D] px-1.5 py-0.5 text-[0.625rem] font-extrabold uppercase tracking-[0.08em] text-brand-950">Beta</span>
+              </p>
               <p className="mt-0.5 text-xs leading-relaxed text-muted">
                 Satu isyarat = satu kata. Kata yang dikenali masuk ke kolom pesan, lalu tekan Kirim.
+              </p>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted">
+                Masih fitur percobaan: kosakata yang dikenali baru sedikit, jadi belum semua isyarat bisa dibaca. Kalau belum cocok, ketik saja pertanyaanmu.
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={onClose} aria-label="Tutup input isyarat">

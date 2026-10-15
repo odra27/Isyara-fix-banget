@@ -34,7 +34,9 @@ export default function VideoListPage() {
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return MATERI.filter((m) => filter === 'Semua' || m.subject === filter).filter(
-      (m) => !needle || [m.title, m.subject, m.summary, m.teacher, ...m.sections.map((s) => s.title)].some((t) => t.toLowerCase().includes(needle)),
+      (m) =>
+        !needle ||
+        [m.title, m.subject, m.summary, m.bookTitle, m.bookSource, ...m.sections.map((s) => s.title)].some((t) => t.toLowerCase().includes(needle)),
     );
   }, [q, filter]);
 
@@ -86,7 +88,7 @@ export default function VideoListPage() {
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Cari judul, topik, atau guru…"
+            placeholder="Cari judul, topik, atau buku…"
             className="h-11 w-full rounded-2xl border border-line bg-white pl-10 pr-4 text-sm text-brand-900 placeholder:text-muted focus:border-brand-400 focus:outline-none"
           />
         </label>

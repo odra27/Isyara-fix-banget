@@ -143,8 +143,8 @@ export function LoginPage() {
               <BookOpen className="size-3.5" aria-hidden="true" /> Platform Edukasi Inklusif
             </span>
             <h1 className="mt-4 text-[clamp(2.25rem,4.4vw,3.5rem)] font-extrabold leading-[1] tracking-[-0.055em] text-brand-900">
-              Belajar jadi <br />
-              lebih <span className="relative inline-block">dekat.<Underline /></span>
+              Memahami <br />
+              Tanpa <span className="relative inline-block">Batas<Underline /></span>
             </h1>
             <p className="mt-5 max-w-md text-base leading-relaxed text-muted">
               Materi dengan bahasa isyarat, teks, dan audio. Tanya apa saja ke chatbot ISYARA, lewat ketikan atau isyarat.
@@ -277,7 +277,7 @@ export function LoginPage() {
   );
 }
 
-/** Garis tangan di bawah kata "dekat." (dekoratif). */
+/** Garis tangan di bawah kata terakhir tagline (dekoratif). */
 function Underline() {
   return (
     <svg aria-hidden="true" viewBox="0 0 200 18" className="absolute -bottom-2 left-0 h-3 w-full text-brand-400" preserveAspectRatio="none">

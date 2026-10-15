@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   Bookmark,
+  BookOpen,
   Captions,
   CaptionsOff,
   Maximize,
@@ -12,12 +13,13 @@ import {
   Pause,
   Play,
   Repeat,
+  RotateCcw,
+  RotateCw,
   Settings2,
   Volume2,
   X,
 } from 'lucide-react';
 import { useAuth } from '@/auth/AuthContext';
-import { Avatar } from '@/auth/components/Avatar';
 import { Button } from '@/components/ui/button';
 import { SignCaption } from '@/components/ui/sign-caption';
 import { SignerAvatar } from '@/components/ui/signer-avatar';
@@ -31,6 +33,8 @@ import { CAPTION_SIZE_LABEL, useSettings, type CaptionSize } from '@/state/Setti
 import { cn } from '@/lib/utils';
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5] as const;
+/** Besar lompatan tombol ulangi / maju (detik). */
+const SKIP_SEC = 10;
 
 /**
  * Tonton video + tanya per detik (ADR-053 D3). Kiri: pemutar (caption gaya YouTube, bab di progress
@@ -69,6 +73,8 @@ function Watch({ m }: { m: Materi }) {
   const [playing, setPlaying] = useState(false);
   const [run, setRun] = useState(0);
   const [progress, setProgressPct] = useState(0);
+  /** Posisi awal pemutaran di dalam bagian (0..1): dipakai saat melanjutkan & melompat ±10 detik. */
+  const [startFrac, setStartFrac] = useState(0);
   const [word, setWord] = useState(-1);
   const [speed, setSpeed] = useState<number>(settings.signSpeed);
   const [loop, setLoop] = useState(false);
@@ -92,10 +98,12 @@ function Watch({ m }: { m: Materi }) {
   useEffect(() => cancelSpeech, [cancelSpeech]);
 
   const go = useCallback(
-    (i: number, autoplay = true) => {
+    (i: number, autoplay = true, frac = 0) => {
+      const at = Math.min(0.999, Math.max(0, frac));
       setActive(i);
       setWord(-1);
-      setProgressPct(0);
+      setProgressPct(at);
+      setStartFrac(at);
       setStarted(true);
       setPlaying(autoplay);
       setRun((r) => r + 1);
@@ -103,7 +111,18 @@ function Watch({ m }: { m: Materi }) {
     },
     [m.id, store],
   );
-  const seek = useCallback((t: number) => go(sectionAt(m, t)), [go, m]);
+
+  /** Lompat ke detik tertentu: bagian yang memuatnya, diputar dari posisi detik itu. */
+  const seek = useCallback(
+    (t: number) => {
+      const at = Math.min(total - 0.05, Math.max(0, t));
+      const i = sectionAt(m, at);
+      go(i, true, (at - sectionStart(m, i)) / sectionSec(m));
+    },
+    [go, m, total],
+  );
+  /** Tombol −10 / +10 detik (tNow berubah tiap frame, jadi tidak perlu di-memo). */
+  const jump = (delta: number) => seek(tNow + delta);
 
   const onDone = () => {
     if (loop) return go(active);
@@ -114,7 +133,8 @@ function Watch({ m }: { m: Materi }) {
   };
 
   const pause = useCallback(() => setPlaying(false), []);
-  const toggle = () => (playing ? pause() : go(active));
+  // Lanjut dari posisi terakhir; kalau bagiannya sudah habis, mulai bagian itu dari awal.
+  const toggle = () => (playing ? pause() : go(active, true, progress >= 0.999 ? 0 : progress));
 
   // layar penuh
   useEffect(() => {
@@ -194,6 +214,7 @@ function Watch({ m }: { m: Materi }) {
                   clips={clips}
                   run={run}
                   speed={speed}
+                  startProgress={startFrac}
                   onProgress={setProgressPct}
                   onSegment={setWord}
                   onDone={onDone}
@@ -221,9 +242,11 @@ function Watch({ m }: { m: Materi }) {
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-3 pb-2.5 pt-10 text-white">
                 <Timeline m={m} t={tNow} total={total} markers={markers} onSeek={seek} />
                 <div className="mt-1.5 flex items-center gap-1">
+                  <SkipBtn back label={`Ulangi ${SKIP_SEC} detik`} onClick={() => jump(-SKIP_SEC)} disabled={tNow <= 0.05} />
                   <IconBtn label={playing ? 'Jeda' : 'Putar'} onClick={toggle}>
                     {playing ? <Pause className="size-5" fill="currentColor" /> : <Play className="size-5" fill="currentColor" />}
                   </IconBtn>
+                  <SkipBtn label={`Maju ${SKIP_SEC} detik`} onClick={() => jump(SKIP_SEC)} disabled={tNow >= total - 0.1} />
                   <span className="ml-1 text-xs font-bold tabular-nums">
                     {clock(tNow)} <span className="text-white/60">/ {clock(total)}</span>
                   </span>
@@ -289,11 +312,16 @@ function Watch({ m }: { m: Materi }) {
           <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h1 className="text-[1.5rem] font-extrabold leading-tight tracking-[-0.035em] md:text-[1.75rem]">{m.title}</h1>
-              <div className="mt-2 flex items-center gap-2.5">
-                <Avatar name={m.teacher} photoUrl={m.teacherPhoto} className="size-9" textClassName="text-xs" />
-                <div>
-                  <p className="text-sm font-extrabold text-brand-900">{m.teacher}</p>
-                  <p className="text-xs text-muted">{subjectLabel(m)}</p>
+              {/* Sumber materi: buku pelajaran (judul buku, sumber, kelas). */}
+              <div className="mt-2 flex items-start gap-2.5">
+                <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600" aria-hidden="true">
+                  <BookOpen className="size-[1.15rem]" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-brand-900">{m.bookTitle}</p>
+                  <p className="text-xs text-muted">
+                    {m.bookSource} · {subjectLabel(m)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -356,6 +384,27 @@ function IconBtn({ label, onClick, on, children }: { label: string; onClick: () 
       className={cn('grid size-9 place-items-center rounded-full transition-colors hover:bg-white/15', on && 'text-[#FFD84D]')}
     >
       {children}
+    </button>
+  );
+}
+
+/** Ulangi / maju 10 detik: panah melingkar dengan angka di tengahnya (pola pemutar video). */
+function SkipBtn({ label, onClick, disabled, back = false }: { label: string; onClick: () => void; disabled?: boolean; back?: boolean }) {
+  const Icon = back ? RotateCcw : RotateCw;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="relative grid size-9 place-items-center rounded-full transition-colors hover:bg-white/15 disabled:opacity-40 disabled:hover:bg-transparent"
+    >
+      <Icon className="size-[1.35rem]" aria-hidden="true" />
+      {/* Pusat busur ikon ada di y=13 (viewBox 24), jadi angkanya digeser sedikit ke bawah. */}
+      <span aria-hidden="true" className="absolute translate-y-px text-[0.5rem] font-extrabold leading-none tabular-nums">
+        {SKIP_SEC}
+      </span>
     </button>
   );
 }
@@ -545,6 +594,7 @@ function VideoChat({
                   onDiscard={() => chat.discard(x.id)}
                   onSeek={seek}
                   rewatch={t != null ? { t, onClick: () => seek(t) } : null}
+                  compact
                 />
               ))}
               {chat.sending && <Typing key="typing" />}

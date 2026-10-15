@@ -53,7 +53,8 @@ def upload(c, h, sid, data, name="materi.pdf", mime="application/pdf"):
 
 def test_catalog_shape():
     assert set(VIDEOS) == {"siklus-air", "bangun-datar", "perkenalan-diri", "tata-surya", "simple-present",
-                           "alat-transportasi", "persentase", "warna"}
+                           "alat-transportasi", "persentase", "warna", "bagian-tumbuhan", "pecahan",
+                           "pancasila", "sapaan-inggris"}
     assert all(v.sections and all(s.title and s.text for s in v.sections) for v in VIDEOS.values())
 
 

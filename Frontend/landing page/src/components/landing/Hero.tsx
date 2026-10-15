@@ -64,10 +64,9 @@ export function Hero() {
             Platform Edukasi Inklusif
           </p>
           <h1 className="mt-5 text-[clamp(42px,11vw,58px)] font-extrabold leading-[1] tracking-[-0.055em] md:text-[clamp(52px,5.6vw,80px)]">
-            <span className="js-hw inline-block">Belajar</span> <span className="js-hw inline-block">jadi</span>{' '}
-            <span className="js-hw inline-block">lebih</span>{' '}
+            <span className="js-hw inline-block">Memahami</span> <span className="js-hw inline-block">Tanpa</span>{' '}
             <span className="js-hw relative inline-block text-brand-600">
-              dekat.
+              Batas
               <svg
                 viewBox="0 0 200 20"
                 preserveAspectRatio="none"

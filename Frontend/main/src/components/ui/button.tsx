@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-type Variant = 'primary' | 'dark' | 'outline' | 'ghost' | 'soft';
+type Variant = 'primary' | 'dark' | 'outline' | 'ghost' | 'soft' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANT: Record<Variant, string> = {
@@ -10,6 +10,8 @@ const VARIANT: Record<Variant, string> = {
   outline: 'border border-line bg-white text-brand-800 hover:bg-brand-50',
   ghost: 'text-brand-800 hover:bg-brand-50',
   soft: 'bg-brand-50 text-brand-800 hover:bg-brand-100',
+  /** Tindakan yang menghapus data (mis. hapus percakapan). */
+  danger: 'bg-rec text-white hover:bg-[#b93a3a] shadow-[0_10px_22px_rgba(214,69,69,0.22)]',
 };
 const SIZE: Record<Size, string> = {
   sm: 'h-9 px-3 text-xs gap-1.5 rounded-xl',

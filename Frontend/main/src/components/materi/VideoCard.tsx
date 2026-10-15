@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Bookmark, CheckCircle2, Play } from 'lucide-react';
-import { Avatar } from '@/auth/components/Avatar';
+import { Bookmark, BookOpen, CheckCircle2, Play } from 'lucide-react';
 import { SignerAvatar } from '@/components/ui/signer-avatar';
 import { subjectLabel, type Materi } from '@/data/materi';
 import type { Progress } from '@/state/materi.store';
 import { cn } from '@/lib/utils';
 
-/** Kartu video pelajaran: thumbnail, judul, guru pengampu, mapel, durasi, progres menonton. */
+/** Kartu video pelajaran: thumbnail, judul materi, buku sumber, mapel & kelas, durasi, progres. */
 export function VideoCard({ m, saved, progress, index = 0 }: { m: Materi; saved?: boolean; progress?: Progress; index?: number }) {
   const pct = progress ? (progress.done ? 1 : (progress.section + 0.5) / m.sections.length) : 0;
   return (
@@ -21,7 +20,7 @@ export function VideoCard({ m, saved, progress, index = 0 }: { m: Materi; saved?
       <Link
         to={`/video/${m.id}`}
         className="group block overflow-hidden rounded-3xl border border-line bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft"
-        aria-label={`${m.title}, ${m.teacher}, ${subjectLabel(m)}, durasi ${m.duration}`}
+        aria-label={`${m.title}, dari buku ${m.bookTitle}, ${m.bookSource}, ${subjectLabel(m)}, durasi ${m.duration}`}
       >
         <div className={cn('relative aspect-[16/10] overflow-hidden bg-gradient-to-br', m.bg)}>
           <SignerAvatar tone={m.tone} animated={false} className="absolute inset-x-[22%] bottom-0 top-[10%] transition-transform duration-500 group-hover:scale-[1.04]" />
@@ -46,10 +45,13 @@ export function VideoCard({ m, saved, progress, index = 0 }: { m: Materi; saved?
           )}
         </div>
         <div className="flex gap-3 p-3.5">
-          <Avatar name={m.teacher} photoUrl={m.teacherPhoto} className="mt-0.5 size-9" textClassName="text-xs" />
+          <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600" aria-hidden="true">
+            <BookOpen className="size-[1.1rem]" />
+          </span>
           <div className="min-w-0 flex-1">
             <p className="line-clamp-2 text-[0.9375rem] font-extrabold leading-snug tracking-[-0.01em] text-brand-900">{m.title}</p>
-            <p className="mt-0.5 truncate text-xs font-semibold text-brand-800">{m.teacher}</p>
+            <p className="mt-0.5 line-clamp-2 text-xs font-semibold leading-snug text-brand-800">{m.bookTitle}</p>
+            <p className="mt-0.5 truncate text-[0.6875rem] text-muted">{m.bookSource}</p>
             <p className="truncate text-xs text-muted">{subjectLabel(m)}</p>
           </div>
         </div>

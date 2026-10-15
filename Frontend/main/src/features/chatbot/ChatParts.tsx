@@ -23,6 +23,7 @@ export function Bubble({
   onDiscard,
   onSeek,
   rewatch,
+  compact = false,
 }: {
   m: ViewMessage;
   autoPlay: boolean;
@@ -34,6 +35,8 @@ export function Bubble({
   onSeek?: (t: number) => void;
   /** Halaman video: tautan "Lihat lagi" di bawah jawaban. */
   rewatch?: { t: number; onClick: () => void } | null;
+  /** Gelembung di kolom sempit (panel tanya samping video): caption di bawah animasi isyarat. */
+  compact?: boolean;
 }) {
   if (m.role === 'user') {
     const t = m.videoTSec;
@@ -102,7 +105,7 @@ export function Bubble({
       <div className="min-w-0 flex-1">
         <div className="rounded-2xl rounded-tl-md border border-line bg-white px-4 py-3">
           <p className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-brand-900">{m.content}</p>
-          <AnswerSign text={m.content} autoPlay={autoPlay} />
+          <AnswerSign text={m.content} autoPlay={autoPlay} compact={compact} />
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-1 px-1">
           <button

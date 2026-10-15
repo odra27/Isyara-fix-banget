@@ -45,7 +45,8 @@ export function Vocabulary() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 md:mt-14 lg:grid-cols-5">
+        {/* Empat kelompok: 2 kolom di layar sedang, 4 kolom sejajar di layar lebar. */}
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 md:mt-14 lg:grid-cols-4">
           {GROUPS.map((g) => (
             <div key={g.code} className="js-group rounded-3xl border border-white/10 bg-white/[0.04] p-5">
               <div className="flex items-center justify-between">
@@ -61,15 +62,6 @@ export function Vocabulary() {
               </ul>
             </div>
           ))}
-          <div className="js-group rounded-3xl bg-brand-600 p-5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[15px] font-extrabold">Di luar daftar?</h3>
-              <span className="text-[11px] font-extrabold text-brand-100">E</span>
-            </div>
-            <p className="mt-4 text-[13px] leading-relaxed text-white">
-              Ketik saja. Jawaban chatbot tetap ditampilkan sebagai animasi isyarat, termasuk kata yang belum dilatih.
-            </p>
-          </div>
         </div>
         <p className="mt-6 text-[12px] text-brand-200">
           Contoh di atas sebagian dari kosakata terlatih, satu dialek BISINDO.
