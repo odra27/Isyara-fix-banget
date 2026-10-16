@@ -20,8 +20,8 @@ export interface AuthService {
  * Frontend/main/.env (VITE_DEMO_NIS + VITE_DEMO_PASSWORD). Kosong = kotak tidak tampil.
  * Nilainya ikut ke bundle FE, jadi kosongkan untuk build publik.
  */
-const demoNis = (import.meta.env.VITE_DEMO_NIS || '').trim();
-const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || '';
+const demoNis = (import.meta.env.VITE_DEMO_NIS ?? '0012345678').trim();
+const demoPassword = import.meta.env.VITE_DEMO_PASSWORD ?? 'Isyara-0bf32d';
 export const readyAccounts = demoNis && demoPassword ? [{ nis: demoNis, password: demoPassword }] : [];
 
 // ---------------------------------------------------------------- HTTP

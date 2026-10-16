@@ -91,3 +91,61 @@ def test_too_many_frames_is_413_and_modeling_not_called():
 
 def test_frame_limit_comes_from_predictor():
     assert LibraryModelingClient(FakePredictor(max_frames=123)).max_frames == 123
+
+
+def test_http_modeling_client_success():
+    import httpx
+    from app.modeling.client import HttpModelingClient
+
+    res_body = modeling_result(phrase_id="label_10", label="Terima kasih", confidence=0.95, action="accept")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/predict"
+        return httpx.Response(200, json=res_body)
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://test-model")
+    http_client = HttpModelingClient("http://test-model", client=client)
+    res = _run(http_client, _seq())
+    assert res.phraseId == "label_10"
+    assert res.confidence == 0.95
+    assert res.action == "accept"
+
+
+def test_http_modeling_client_unavailable_on_503():
+    import httpx
+    from app.modeling.client import HttpModelingClient
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503, text="Service Unavailable")
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://test-model")
+    http_client = HttpModelingClient("http://test-model", client=client)
+    with pytest.raises(ModelingUnavailable):
+        _run(http_client, _seq())
+
+
+def test_http_modeling_client_timeout():
+    import httpx
+    from app.modeling.client import HttpModelingClient
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("timed out")
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://test-model")
+    http_client = HttpModelingClient("http://test-model", client=client)
+    with pytest.raises(ModelingTimeout):
+        _run(http_client, _seq())
+
+
+def test_load_modeling_client_uses_service_url(monkeypatch):
+    from app.modeling.client import HttpModelingClient, LibraryModelingClient, load_modeling_client
+
+    monkeypatch.setenv("MODELING_SERVICE_URL", "https://isyara-model.example.com")
+    c = load_modeling_client()
+    assert isinstance(c, HttpModelingClient)
+    assert c._base_url == "https://isyara-model.example.com"
+
+    monkeypatch.delenv("MODELING_SERVICE_URL")
+    c_lib = load_modeling_client()
+    assert isinstance(c_lib, LibraryModelingClient)
+

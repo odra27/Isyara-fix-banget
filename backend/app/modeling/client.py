@@ -19,9 +19,11 @@ from __future__ import annotations
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import os
 from pathlib import Path
 from typing import Any, Protocol
 
+import httpx
 from pydantic import ValidationError
 
 from app.errors import ModelingInternalError, ModelingTimeout, ModelingUnavailable, PayloadTooLarge
@@ -94,3 +96,72 @@ class LibraryModelingClient:
 
     def close(self) -> None:
         self._executor.shutdown(wait=False, cancel_futures=True)
+
+
+class HttpModelingClient:
+    """HTTP client for standalone ML service (e.g. Railway ML deployment)."""
+
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        timeout_s: float = MODELING_TIMEOUT_S,
+        client: httpx.AsyncClient | None = None,
+    ) -> None:
+        self._base_url = base_url.rstrip("/")
+        self._timeout_s = timeout_s
+        self._client = client or httpx.AsyncClient(base_url=self._base_url, timeout=timeout_s)
+
+    @property
+    def max_frames(self) -> int:
+        return 600
+
+    async def match_sign(self, sequence: SignSequence) -> ModelingSignResult:
+        n_frames = len(sequence.frames)
+        if n_frames > self.max_frames:
+            raise PayloadTooLarge(f"sequence has {n_frames} frames (max {self.max_frames})")
+
+        payload = sequence.model_dump(mode="json")
+        try:
+            res = await self._client.post("/predict", json=payload)
+        except httpx.TimeoutException:
+            raise ModelingTimeout(f"Modeling did not respond within {self._timeout_s:g} s") from None
+        except Exception as exc:
+            raise ModelingInternalError(
+                f"Modeling HTTP request failed ({type(exc).__name__})"
+            ) from None
+
+        if res.status_code == 503:
+            raise ModelingUnavailable("Modeling service reported unavailable")
+        if not res.is_success:
+            raise ModelingInternalError(f"Modeling HTTP error {res.status_code}: {res.text}")
+
+        try:
+            raw = res.json()
+            return ModelingSignResult.model_validate(raw)
+        except ValidationError as exc:
+            raise ModelingInternalError("Modeling response violated the contract") from exc
+        except Exception as exc:
+            raise ModelingInternalError(f"Modeling returned invalid response ({type(exc).__name__})") from None
+
+    def close(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._client.aclose())
+        except RuntimeError:
+            pass
+
+
+def load_modeling_client(
+    artifacts_dir: str | Path | None = None, *, timeout_s: float = MODELING_TIMEOUT_S
+) -> ModelingClient:
+    """Load modeling client: use remote HTTP service if MODELING_SERVICE_URL is set, else local library."""
+    service_url = (
+        os.environ.get("MODELING_SERVICE_URL")
+        or os.environ.get("MODELING_URL")
+        or ""
+    ).strip()
+    if service_url:
+        return HttpModelingClient(service_url, timeout_s=timeout_s)
+    return LibraryModelingClient.load(artifacts_dir, timeout_s=timeout_s)
+

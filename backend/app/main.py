@@ -43,7 +43,7 @@ from app.db.session import OpenDb, open_postgres
 from app.errors import BackendError, ModelingUnavailable
 from app.auth.jwt_verifier import JwtVerifier
 from app.auth.supabase_auth import SupabaseAuthClient
-from app.modeling.client import LibraryModelingClient, ModelingClient
+from app.modeling.client import LibraryModelingClient, ModelingClient, load_modeling_client
 from app.provisioning.supabase_admin import SupabaseAdminClient
 from app.storage.supabase import SupabaseStorage
 
@@ -69,7 +69,7 @@ def cors_origins() -> list[str]:
 
 def create_app(
     *,
-    modeling_factory: ModelingFactory = LibraryModelingClient.load,
+    modeling_factory: ModelingFactory = load_modeling_client,
     open_db: OpenDb = open_postgres,
     jwt_verifier_factory: JwtVerifierFactory = JwtVerifier.from_env,
     storage_factory: StorageFactory = SupabaseStorage.from_env,
