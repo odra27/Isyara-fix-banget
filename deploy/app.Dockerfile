@@ -10,7 +10,8 @@ ARG VITE_DEVICE_ID
 ARG VITE_DEMO_NIS
 ARG VITE_DEMO_PASSWORD
 
-# Model MediaPipe (.task) ada di Frontend/main/models/ dan disalin ke public/ saat build.
+# Model MediaPipe (.task) disalin ke public/ oleh scripts/copy-mediapipe.mjs saat build.
+COPY ml/mp_models ml/mp_models
 COPY Frontend/main/package.json Frontend/main/package-lock.json Frontend/main/
 RUN cd Frontend/main && npm ci
 COPY Frontend/main Frontend/main
