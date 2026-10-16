@@ -3,7 +3,7 @@ import { gsap, useGSAP, MOTION_OK, REDUCED } from '../../lib/gsap';
 import { EASE } from '../../animations/tokens';
 import { TabletDemo } from './TabletDemo';
 import { Icon } from '../ui/Icon';
-import { KIOSK_URL } from '../../config/links';
+import { LOGIN_URL } from '../../config/links';
 const HAND_FONT = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive';
 /** Tumpukan buku + gelas pensil (dekoratif). */
 function BooksAndPencils({ className = '' }: { className?: string }) {
@@ -94,7 +94,7 @@ export function Hero() {
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
               <a
-                href={KIOSK_URL}
+                href={LOGIN_URL}
                 className="group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl bg-brand-600 py-3 pl-3 pr-5 text-[15px] font-bold text-white shadow-[0_12px_25px_rgba(83,74,183,0.28)] transition hover:-translate-y-0.5 hover:bg-brand-800 sm:flex-none"
               >
                 <span className="grid size-8 place-items-center rounded-full bg-white/20">

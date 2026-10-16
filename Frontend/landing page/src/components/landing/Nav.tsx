@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Logo } from '../ui/Logo';
 import { Icon } from '../ui/Icon';
 import { LOGIN_URL, isValidAppUrl } from '../../config/links';
@@ -10,15 +9,6 @@ const LINKS = [
   { href: '#tentang', label: 'Tentang' },
 ];
 export function Nav() {
-  // Tujuan login dibaca dari env; nilai keliru tidak dibuka, tapi diberi tahu ke pengguna.
-  const [loginError, setLoginError] = useState(false);
-  const openLogin = () => {
-    if (!isValidAppUrl(LOGIN_URL)) {
-      setLoginError(true);
-      return;
-    }
-    window.location.assign(LOGIN_URL);
-  };
   return (
     <header className="fixed left-1/2 top-3 z-50 w-[min(1160px,calc(100%-24px))] -translate-x-1/2">
       <div className="flex h-14 items-center justify-between rounded-2xl border border-line/90 bg-white/80 pl-4 pr-2 backdrop-blur-xl">
@@ -40,17 +30,16 @@ export function Nav() {
             <Icon name="school" className="size-4" />
             Untuk Sekolah
           </a>
-          <button
-            type="button"
-            onClick={openLogin}
+          <a
+            href={LOGIN_URL}
             className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-600 px-5 py-2.5 text-[12.5px] font-bold text-white shadow-[0_8px_20px_rgba(83,74,183,0.25)] transition-colors hover:bg-brand-800"
           >
             Masuk
-          </button>
+          </a>
         </div>
       </div>
       <div role="status" aria-live="polite">
-        {loginError && (
+        {!isValidAppUrl(LOGIN_URL) && (
           <p className="mt-2 rounded-xl border border-line bg-white px-3.5 py-2 text-[12px] font-semibold text-brand-900">
             Tujuan halaman masuk belum tersedia. Hubungi admin sekolah atau periksa pengaturan VITE_LOGIN_URL.
           </p>
