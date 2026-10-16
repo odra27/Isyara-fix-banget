@@ -299,7 +299,17 @@ Uji kamera/mic dari HP/tablet: `npm run dev:https` di `Frontend\main`, buka `htt
 
 ## 9. Deployment
 
-Repo belum berisi konfigurasi deployment (Dockerfile/CI). Catatan untuk deployment:
+**Railway (disiapkan):** tiga service dari repo GitHub yang sama, Root Directory kosong (root repo), masing-masing dengan service variable `RAILWAY_DOCKERFILE_PATH`:
+
+| Service | Dockerfile | Variabel |
+|---|---|---|
+| backend | `deploy/backend.Dockerfile` (Python 3.12, `serve.py` di `$PORT`, healthcheck `/api/health`) | isi `backend/.env` (tanpa `LOCAL_DEV_DB`) + `CORS_ALLOW_ORIGINS=<URL app>` |
+| app | `deploy/app.Dockerfile` (build Vite → Caddy, fallback SPA) | `VITE_API_BASE_URL=<URL backend>`, `VITE_LANDING_URL`, opsional `VITE_DEMO_NIS`/`VITE_DEMO_PASSWORD` (build-time) |
+| landing | `deploy/landing.Dockerfile` | `VITE_KIOSK_URL=<URL app>/`, `VITE_LOGIN_URL=<URL app>/login` |
+
+Variabel `VITE_*` dibaca saat build, jadi perubahan nilainya butuh redeploy. `.dockerignore` mencegah `.env`, `node_modules`, dan `.venv` masuk image.
+
+Catatan umum:
 
 - **Backend:** CPython 3.12; install dari root repo dalam satu environment: `pip install -r ml/requirements.txt` (atau subset runtime), `pip install -e ml`, `pip install -e backend`. Jalankan `uvicorn app.main:app` dari `backend/`. Variabel dari secret store, bukan file `.env`. `LOCAL_DEV_DB` jangan di-set. Set `CORS_ALLOW_ORIGINS` ke origin FE produksi.
 - **Database:** terapkan semua `Database/migrations` berurutan; butuh skema `auth` Supabase. Gunakan session pooler. Backend membuka satu koneksi per request (tanpa pool).
