@@ -1,0 +1,14 @@
+# Jangan ikutkan rahasia, dependency lokal, dan hasil build ke image deploy.
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+**/.venv
+**/dist
+**/__pycache__
+**/.pytest_cache
+.git
+Frontend/main/public/mediapipe
+ml/exports
+ml/tests
+ml/scripts
