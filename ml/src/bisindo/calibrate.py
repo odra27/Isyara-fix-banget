@@ -12,14 +12,10 @@ import argparse
 import json
 from pathlib import Path
 
-import matplotlib
+import numpy as np
 
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-
-from .config import load_config, resolve  # noqa: E402
-from .evaluate import coverage_table, ece, known_confidence, load_preds, open_set_metrics, softmax  # noqa: E402
+from .config import load_config, resolve
+from .evaluate import coverage_table, ece, known_confidence, load_preds, open_set_metrics, softmax
 
 
 def fit_temperature(logits: np.ndarray, y: np.ndarray) -> float:
@@ -96,6 +92,10 @@ def remap(conf: np.ndarray, confirm: float, accept: float, k_confirm: float, k_a
 
 
 def reliability_plot(conf, correct, path: Path, title: str):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
     edges = np.linspace(0, 1, 11)
     xs, ys, ns = [], [], []
     for lo, hi in zip(edges[:-1], edges[1:]):
