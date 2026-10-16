@@ -20,8 +20,8 @@ function parseValidUrl(raw: unknown): string | null {
   return isValidAppUrl(trimmed) ? trimmed : null;
 }
 
-const DEFAULT_LOGIN_URL = 'https://isyara-jointss.vercel.app/login';
-const DEFAULT_APP_URL = 'https://isyara-jointss.vercel.app';
+const DEFAULT_LOGIN_URL = 'https://isyaramain.vercel.app/login';
+const DEFAULT_APP_URL = 'https://isyaramain.vercel.app';
 
 const validAppUrl =
   parseValidUrl(import.meta.env.VITE_APP_URL) ||
